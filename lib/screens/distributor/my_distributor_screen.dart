@@ -1,46 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../cards/chemist_shop/chemist_shop_card.dart';
-import '../../cards/chemist_shop/chemist_shop_search_filter_card.dart';
-import '../../provider/chemist_shop_provider.dart';
+import '../../cards/distributor/distributor_card.dart';
+import '../../cards/distributor/distributor_search_filter_card.dart';
+import '../../provider/distributor_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/bottom_nav_bar.dart';
 
-class MyChemistShopScreen extends ConsumerStatefulWidget {
-  const MyChemistShopScreen({super.key});
+class MyDistributorScreen extends ConsumerStatefulWidget {
+  const MyDistributorScreen({super.key});
 
   @override
-  ConsumerState<MyChemistShopScreen> createState() =>
-      _MyChemistShopScreenState();
+  ConsumerState<MyDistributorScreen> createState() =>
+      _MyDistributorScreenState();
 }
 
-class _MyChemistShopScreenState extends ConsumerState<MyChemistShopScreen> {
+class _MyDistributorScreenState extends ConsumerState<MyDistributorScreen> {
   String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
-    final allShops = ref.watch(chemistShopProvider);
-    final filteredShops = _searchQuery.isEmpty
-        ? allShops
-        : ref.watch(searchChemistShopProvider(_searchQuery));
+    final allDistributors = ref.watch(distributorProvider);
+    final filteredDistributors = _searchQuery.isEmpty
+        ? allDistributors
+        : ref.watch(searchDistributorProvider(_searchQuery));
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: const MRAppBar(
         showBack: false,
-        showActions: false,
-        titleText: 'My Chemist Shops',
-        subtitleText: 'Manage your pharmacy network',
+        showActions: true,
+        titleText: 'My Distributors',
+        subtitleText: 'Manage your supply network',
       ),
       body: Column(
         children: [
           // Search and Filter Card
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: ChemistShopSearchFilterCard(
+            child: DistributorSearchFilterCard(
               onSearchChanged: (query) {
                 setState(() => _searchQuery = query);
               },
@@ -54,23 +53,23 @@ class _MyChemistShopScreenState extends ConsumerState<MyChemistShopScreen> {
               },
             ),
           ),
-          // Shops List
+          // Distributors List
           Expanded(
-            child: filteredShops.isEmpty
+            child: filteredDistributors.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Iconsax.shop,
+                          Iconsax.truck,
                           size: 80,
                           color: AppColors.quaternary.withOpacity(0.5),
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         Text(
                           _searchQuery.isEmpty
-                              ? 'No shops found'
-                              : 'No shops match your search',
+                              ? 'No distributors found'
+                              : 'No distributors match your search',
                           style: AppTypography.h3.copyWith(
                             color: AppColors.quaternary,
                           ),
@@ -78,7 +77,7 @@ class _MyChemistShopScreenState extends ConsumerState<MyChemistShopScreen> {
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           _searchQuery.isEmpty
-                              ? 'Add a new shop to get started'
+                              ? 'Add a new distributor to get started'
                               : 'Try a different search term',
                           style: AppTypography.body.copyWith(
                             color: AppColors.quaternary,
@@ -92,28 +91,16 @@ class _MyChemistShopScreenState extends ConsumerState<MyChemistShopScreen> {
                       horizontal: AppSpacing.lg,
                       vertical: AppSpacing.sm,
                     ),
-                    itemCount: filteredShops.length,
+                    itemCount: filteredDistributors.length,
                     itemBuilder: (context, index) {
-                      final shop = filteredShops[index];
-                      return ChemistShopCard(shop: shop);
+                      final distributor = filteredDistributors[index];
+                      return DistributorCard(distributor: distributor);
                     },
                   ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/mr/chemist/add'),
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Iconsax.add, color: AppColors.white),
-        label: Text(
-          'Add Shop',
-          style: AppTypography.bodyLarge.copyWith(
-            color: AppColors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      bottomNavigationBar: const MRBottomNavBar(currentIndex: 4),
+      bottomNavigationBar: const MRBottomNavBar(currentIndex: 5),
     );
   }
 }

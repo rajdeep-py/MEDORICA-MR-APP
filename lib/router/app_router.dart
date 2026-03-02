@@ -11,6 +11,8 @@ import '../screens/appointment/schedule_edit_appointment_screen.dart';
 import '../screens/chemist_shop/my_chemist_shop_screen.dart';
 import '../screens/chemist_shop/chemist_shop_detail_screen.dart';
 import '../screens/chemist_shop/add_edit_chemist_shop_screen.dart';
+import '../screens/distributor/my_distributor_screen.dart';
+import '../screens/distributor/distributor_detail_screen.dart';
 import '../models/doctor.dart';
 import '../models/chemist_shop.dart';
 
@@ -137,9 +139,17 @@ class AppRouter {
       GoRoute(
         path: distributor,
         name: 'distributor',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Distributors - Coming Soon')),
-        ),
+        builder: (context, state) => const MyDistributorScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            name: 'distributorDetail',
+            builder: (context, state) {
+              final distributorId = state.pathParameters['id']!;
+              return DistributorDetailScreen(distributorId: distributorId);
+            },
+          ),
+        ],
       ),
     ],
   );
