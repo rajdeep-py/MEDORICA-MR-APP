@@ -110,31 +110,33 @@ class _AppointmentFilterOptionsCardState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(Iconsax.filter, color: AppColors.primary, size: 20),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    'Filter Appointments',
-                    style:
-                        AppTypography.tagline.copyWith(color: AppColors.black),
-                  ),
-                ],
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(Iconsax.filter, color: AppColors.primary, size: 20),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      'Filter Appointments',
+                      style:
+                          AppTypography.tagline.copyWith(color: AppColors.black),
+                    ),
+                  ],
+                ),
               ),
               if (hasActiveFilters)
-                TextButton(
-                  onPressed: _clearAllFilters,
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
+                GestureDetector(
+                  onTap: _clearAllFilters,
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
                     ),
-                  ),
-                  child: Text(
-                    'Clear All',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+                    child: Text(
+                      'Clear All',
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
