@@ -29,7 +29,7 @@ class MRGreetingCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-        border: Border.all(color: AppColors.border),
+
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withAlpha(20),
