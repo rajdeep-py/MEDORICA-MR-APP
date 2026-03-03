@@ -394,11 +394,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               children: [
                                 const TextSpan(
-                                  text: 'Having trouble signing in?',
+                                  text: 'Having trouble signing in?  ',
                                 ),
                                
                                 TextSpan(
-                                  text: ' Call Support',
+                                  text: 'Call Support',
                                   style: AppTypography.body.copyWith(
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.w600,

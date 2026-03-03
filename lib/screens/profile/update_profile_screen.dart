@@ -55,6 +55,74 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     _controllersInitialized = true;
   }
 
+  Widget _buildProfileImage() {
+    // Handle newly selected image from camera/gallery
+    if (_selectedImagePath != null) {
+      return ClipOval(
+        child: Image.file(
+          File(_selectedImagePath!),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.person,
+              size: 60,
+              color: AppColors.primary,
+            );
+          },
+        ),
+      );
+    }
+
+    // Handle existing profile image
+    final profile = ref.watch(profileProvider);
+    if (profile?.profileImage != null && profile!.profileImage!.isNotEmpty) {
+      final imagePath = profile.profileImage!;
+      
+      // Check if it's a file path (contains "/" and doesn't start with "assets")
+      if (imagePath.contains('/') && !imagePath.startsWith('assets')) {
+        // It's a file path from the device
+        final file = File(imagePath);
+        if (file.existsSync()) {
+          return ClipOval(
+            child: Image.file(
+              file,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(
+                  Icons.person,
+                  size: 60,
+                  color: AppColors.primary,
+                );
+              },
+            ),
+          );
+        }
+      } else {
+        // It's an asset path
+        return ClipOval(
+          child: Image.asset(
+            imagePath,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(
+                Icons.person,
+                size: 60,
+                color: AppColors.primary,
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    // Default icon when no image is available
+    return const Icon(
+      Icons.person,
+      size: 60,
+      color: AppColors.primary,
+    );
+  }
+
   @override
   void dispose() {
     if (_controllersInitialized) {
@@ -236,25 +304,7 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                                       width: 3,
                                     ),
                                   ),
-                                  child: _selectedImagePath != null
-                                      ? ClipOval(
-                                          child: Image.file(
-                                            File(_selectedImagePath!),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        )
-                                      : profile.profileImage != null
-                                          ? ClipOval(
-                                              child: Image.asset(
-                                                profile.profileImage!,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            )
-                                          : const Icon(
-                                              Icons.person,
-                                              size: 60,
-                                              color: AppColors.primary,
-                                            ),
+                                  child: _buildProfileImage(),
                                 ),
                                 Positioned(
                                   bottom: 0,
