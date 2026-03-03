@@ -25,13 +25,21 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
   late TextEditingController _bankNameController;
   late TextEditingController _branchNameController;
   late TextEditingController _ifscCodeController;
+  late TextEditingController _passwordController;
 
   final ImagePicker _imagePicker = ImagePicker();
   String? _selectedImagePath;
+  bool _controllersInitialized = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    if (_controllersInitialized) return;
+    
     final profile = ref.read(profileProvider);
     _nameController = TextEditingController(text: profile?.name ?? '');
     _phoneController = TextEditingController(text: profile?.phone ?? '');
@@ -42,17 +50,23 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     _branchNameController =
         TextEditingController(text: profile?.branchName ?? '');
     _ifscCodeController = TextEditingController(text: profile?.ifscCode ?? '');
+    _passwordController = TextEditingController(text: profile?.password ?? '');
+    
+    _controllersInitialized = true;
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _emailController.dispose();
-    _accountNoController.dispose();
-    _bankNameController.dispose();
-    _branchNameController.dispose();
-    _ifscCodeController.dispose();
+    if (_controllersInitialized) {
+      _nameController.dispose();
+      _phoneController.dispose();
+      _emailController.dispose();
+      _accountNoController.dispose();
+      _bankNameController.dispose();
+      _branchNameController.dispose();
+      _ifscCodeController.dispose();
+      _passwordController.dispose();
+    }
     super.dispose();
   }
 
@@ -131,92 +145,6 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     );
   }
 
-  void _showPasswordChangeDialog() {
-    final oldPasswordController = TextEditingController();
-    final newPasswordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change Password'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: oldPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Current Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                  ),
-                  prefixIcon: const Icon(Iconsax.lock),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: newPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'New Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                  ),
-                  prefixIcon: const Icon(Iconsax.lock),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                  ),
-                  prefixIcon: const Icon(Iconsax.lock),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-            ),
-            onPressed: () {
-              if (newPasswordController.text ==
-                  confirmPasswordController.text) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Password changed successfully'),
-                    backgroundColor: AppColors.success,
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Passwords do not match'),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
-              }
-            },
-            child: const Text('Change'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _updateProfile() {
     if (_formKey.currentState!.validate()) {
       ref.read(profileProvider.notifier).updateAllDetails(
@@ -227,6 +155,9 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
             bankName: _bankNameController.text,
             branchName: _branchNameController.text,
             ifscCode: _ifscCodeController.text,
+            password: _passwordController.text.isNotEmpty
+                ? _passwordController.text
+                : null,
           );
 
       if (_selectedImagePath != null) {
@@ -239,16 +170,27 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
         const SnackBar(
           content: Text('Profile updated successfully'),
           backgroundColor: AppColors.success,
+          duration: Duration(seconds: 2),
         ),
       );
 
-      context.pop();
+      // Navigate back to profile screen
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (context.mounted) {
+          context.pop();
+        }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(profileProvider);
+    
+    // Initialize controllers if not already done
+    if (!_controllersInitialized && profile != null) {
+      _initializeControllers();
+    }
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -263,7 +205,11 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             )
-          : SingleChildScrollView(
+          : !_controllersInitialized
+              ? const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                )
+              : SingleChildScrollView(
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -557,23 +503,23 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: AppSpacing.md),
-                          ElevatedButton.icon(
-                            onPressed: _showPasswordChangeDialog,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.secondary,
-                              foregroundColor: AppColors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.lg,
-                                vertical: AppSpacing.md,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppBorderRadius.lg,
-                                ),
-                              ),
+                          // Password
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            decoration: _buildInputDecoration(
+                              hintText: 'Password',
+                              prefixIcon: Iconsax.lock,
                             ),
-                            icon: const Icon(Iconsax.lock),
-                            label: const Text('Change Password'),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter password';
+                              }
+                              if (value.length < 6) {
+                                return 'Password must be at least 6 characters';
+                              }
+                              return null;
+                            },
                           ),
                         ],
                       ),

@@ -16,6 +16,7 @@ class ProfileNotifier extends StateNotifier<MedicalRepresentative?> {
             bankName: 'Dhaka Bank',
             branchName: 'Gulshan Branch',
             ifscCode: 'DKB0001234',
+            password: 'password123',
           ),
         );
 
@@ -63,6 +64,12 @@ class ProfileNotifier extends StateNotifier<MedicalRepresentative?> {
     }
   }
 
+  void updatePassword(String password) {
+    if (state != null) {
+      state = state!.copyWith(password: password);
+    }
+  }
+
   void updateAllDetails({
     required String name,
     required String phone,
@@ -71,6 +78,7 @@ class ProfileNotifier extends StateNotifier<MedicalRepresentative?> {
     required String bankName,
     required String branchName,
     required String ifscCode,
+    String? password,
   }) {
     if (state != null) {
       state = state!.copyWith(
@@ -81,6 +89,7 @@ class ProfileNotifier extends StateNotifier<MedicalRepresentative?> {
         bankName: bankName,
         branchName: branchName,
         ifscCode: ifscCode,
+        password: password,
       );
     }
   }

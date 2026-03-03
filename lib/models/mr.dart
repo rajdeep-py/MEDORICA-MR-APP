@@ -10,6 +10,7 @@ class MedicalRepresentative {
   final String? bankName;
   final String? branchName;
   final String? ifscCode;
+  final String? password;
 
   MedicalRepresentative({
     required this.id,
@@ -23,6 +24,7 @@ class MedicalRepresentative {
     this.bankName,
     this.branchName,
     this.ifscCode,
+    this.password,
   });
 
   factory MedicalRepresentative.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class MedicalRepresentative {
       bankName: json['bankName'] as String?,
       branchName: json['branchName'] as String?,
       ifscCode: json['ifscCode'] as String?,
+      password: json['password'] as String?,
     );
   }
 
@@ -54,6 +57,7 @@ class MedicalRepresentative {
       'bankName': bankName,
       'branchName': branchName,
       'ifscCode': ifscCode,
+      'password': password,
     };
   }
 
@@ -69,6 +73,7 @@ class MedicalRepresentative {
     String? bankName,
     String? branchName,
     String? ifscCode,
+    String? password,
   }) {
     return MedicalRepresentative(
       id: id ?? this.id,
@@ -82,6 +87,7 @@ class MedicalRepresentative {
       bankName: bankName ?? this.bankName,
       branchName: branchName ?? this.branchName,
       ifscCode: ifscCode ?? this.ifscCode,
+      password: password ?? this.password,
     );
   }
 }
