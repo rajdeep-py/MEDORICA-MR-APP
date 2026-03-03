@@ -49,7 +49,7 @@ class MRAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: showActions ? [
         IconButton(
           icon: const Icon(Iconsax.notification, color: AppColors.primary),
-          onPressed: () {},
+          onPressed: () => context.push('/notifications'),
         ),
         Padding(
           padding: const EdgeInsets.only(right: 12.0),
