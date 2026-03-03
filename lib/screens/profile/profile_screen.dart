@@ -39,12 +39,7 @@ class ProfileScreen extends ConsumerWidget {
                   // Profile Options
                   ProfileOptionsCard(
                     onUpdateProfile: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Update Profile feature coming soon'),
-                          backgroundColor: AppColors.secondary,
-                        ),
-                      );
+                      context.push('/profile/update');
                     },
                     onAboutUs: () {
                       ScaffoldMessenger.of(context).showSnackBar(

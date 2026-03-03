@@ -15,6 +15,7 @@ import '../screens/distributor/distributor_detail_screen.dart';
 import '../screens/order/my_order_screen.dart';
 import '../screens/order/create_order_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../screens/profile/update_profile_screen.dart';
 import '../screens/notification/notification_screen.dart';
 import '../models/doctor.dart';
 import '../models/chemist_shop.dart';
@@ -165,6 +166,13 @@ class AppRouter {
         path: profile,
         name: 'profile',
         builder: (context, state) => const ProfileScreen(),
+        routes: [
+          GoRoute(
+            path: 'update',
+            name: 'profileUpdate',
+            builder: (context, state) => const UpdateProfileScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: notifications,

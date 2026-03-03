@@ -6,6 +6,10 @@ class MedicalRepresentative {
   final String designation;
   final String territory;
   final String? profileImage;
+  final String? bankAccountNo;
+  final String? bankName;
+  final String? branchName;
+  final String? ifscCode;
 
   MedicalRepresentative({
     required this.id,
@@ -15,6 +19,10 @@ class MedicalRepresentative {
     required this.designation,
     required this.territory,
     this.profileImage,
+    this.bankAccountNo,
+    this.bankName,
+    this.branchName,
+    this.ifscCode,
   });
 
   factory MedicalRepresentative.fromJson(Map<String, dynamic> json) {
@@ -26,6 +34,10 @@ class MedicalRepresentative {
       designation: json['designation'] as String,
       territory: json['territory'] as String,
       profileImage: json['profileImage'] as String?,
+      bankAccountNo: json['bankAccountNo'] as String?,
+      bankName: json['bankName'] as String?,
+      branchName: json['branchName'] as String?,
+      ifscCode: json['ifscCode'] as String?,
     );
   }
 
@@ -38,6 +50,10 @@ class MedicalRepresentative {
       'designation': designation,
       'territory': territory,
       'profileImage': profileImage,
+      'bankAccountNo': bankAccountNo,
+      'bankName': bankName,
+      'branchName': branchName,
+      'ifscCode': ifscCode,
     };
   }
 
@@ -49,6 +65,10 @@ class MedicalRepresentative {
     String? designation,
     String? territory,
     String? profileImage,
+    String? bankAccountNo,
+    String? bankName,
+    String? branchName,
+    String? ifscCode,
   }) {
     return MedicalRepresentative(
       id: id ?? this.id,
@@ -58,6 +78,10 @@ class MedicalRepresentative {
       designation: designation ?? this.designation,
       territory: territory ?? this.territory,
       profileImage: profileImage ?? this.profileImage,
+      bankAccountNo: bankAccountNo ?? this.bankAccountNo,
+      bankName: bankName ?? this.bankName,
+      branchName: branchName ?? this.branchName,
+      ifscCode: ifscCode ?? this.ifscCode,
     );
   }
 }

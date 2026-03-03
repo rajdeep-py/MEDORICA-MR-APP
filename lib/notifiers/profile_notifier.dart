@@ -12,6 +12,10 @@ class ProfileNotifier extends StateNotifier<MedicalRepresentative?> {
             designation: 'Senior Medical Representative',
             territory: 'Dhaka Division',
             profileImage: null,
+            bankAccountNo: '1234567890',
+            bankName: 'Dhaka Bank',
+            branchName: 'Gulshan Branch',
+            ifscCode: 'DKB0001234',
           ),
         );
 
@@ -34,6 +38,50 @@ class ProfileNotifier extends StateNotifier<MedicalRepresentative?> {
   void updateEmail(String email) {
     if (state != null) {
       state = state!.copyWith(email: email);
+    }
+  }
+
+  void updateName(String name) {
+    if (state != null) {
+      state = state!.copyWith(name: name);
+    }
+  }
+
+  void updateBankDetails({
+    required String accountNo,
+    required String bankName,
+    required String branchName,
+    required String ifscCode,
+  }) {
+    if (state != null) {
+      state = state!.copyWith(
+        bankAccountNo: accountNo,
+        bankName: bankName,
+        branchName: branchName,
+        ifscCode: ifscCode,
+      );
+    }
+  }
+
+  void updateAllDetails({
+    required String name,
+    required String phone,
+    required String email,
+    required String bankAccountNo,
+    required String bankName,
+    required String branchName,
+    required String ifscCode,
+  }) {
+    if (state != null) {
+      state = state!.copyWith(
+        name: name,
+        phone: phone,
+        email: email,
+        bankAccountNo: bankAccountNo,
+        bankName: bankName,
+        branchName: branchName,
+        ifscCode: ifscCode,
+      );
     }
   }
 }
