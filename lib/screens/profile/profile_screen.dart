@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mr_app/cards/home/home_footer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../cards/profile/profile_header_card.dart';
 import '../../cards/profile/profile_options_card.dart';
 import '../../provider/profile_provider.dart';
@@ -10,6 +11,13 @@ import '../../widgets/app_bar.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
+
+  Future<void> _launchPhoneDialer(String phoneNumber) async {
+    final Uri uri = Uri.parse('tel:$phoneNumber');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      debugPrint('Could not launch $phoneNumber');
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,20 +53,10 @@ class ProfileScreen extends ConsumerWidget {
                       context.push('/about-us');
                     },
                     onContactSupport: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Contact Support feature coming soon'),
-                          backgroundColor: AppColors.secondary,
-                        ),
-                      );
+                      _launchPhoneDialer('+916289398298');
                     },
                     onNotifications: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Notifications feature coming soon'),
-                          backgroundColor: AppColors.secondary,
-                        ),
-                      );
+                      context.push('/notifications');
                     },
                   ),
 
