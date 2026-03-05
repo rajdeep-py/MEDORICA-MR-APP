@@ -1,299 +1,273 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
+import '../../../theme/app_theme.dart';
 import '../../provider/home_provider.dart';
 import '../../notifiers/home_notifier.dart';
-import '../../theme/app_theme.dart';
-import '../../models/target.dart';
 
 class MonthlyTargetCard extends ConsumerWidget {
-  const MonthlyTargetCard({super.key});
+	const MonthlyTargetCard({super.key});
 
-  Color _getStatusColor(TargetStatus status) {
-    switch (status) {
-      case TargetStatus.achieved:
-        return const Color(0xFF4CAF50); // Green
-      case TargetStatus.closeToTarget:
-        return const Color(0xFFFFC107); // Amber/Yellow
-      case TargetStatus.onTrack:
-        return const Color(0xFF2196F3); // Blue
-      case TargetStatus.veryFarAway:
-        return const Color(0xFFFF6B6B); // Red
-    }
-  }
+	static const List<String> _months = [
+		'January',
+		'February',
+		'March',
+		'April',
+		'May',
+		'June',
+		'July',
+		'August',
+		'September',
+		'October',
+		'November',
+		'December',
+	];
 
-  IconData _getStatusIcon(TargetStatus status) {
-    switch (status) {
-      case TargetStatus.achieved:
-        return Iconsax.tick_circle;
-      case TargetStatus.closeToTarget:
-        return Iconsax.warning_2;
-      case TargetStatus.onTrack:
-        return Iconsax.arrow_up;
-      case TargetStatus.veryFarAway:
-        return Iconsax.arrow_down_1;
-    }
-  }
+	String _currency(double amount) {
+		return '₹${amount.toStringAsFixed(0)}';
+	}
 
-  String _formatCurrency(double amount) {
-    return '₹${amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => ',')}';
-  }
+	@override
+	Widget build(BuildContext context, WidgetRef ref) {
+		final selectedMonth = ref.watch(homeSelectedMonthProvider);
+		final monthlyTarget = ref.watch(homeProvider);
+		final homeNotifier = ref.read(homeNotifierProvider.notifier);
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final allTargets = ref.watch(allTargetsProvider);
-    final target = ref.watch(selectedMonthTargetProvider);
-    final selectedMonthIndex = ref.watch(selectedMonthIndexProvider);
-    final statusInfo = ref.watch(targetStatusProvider);
-    final percentage = ref.watch(targetPercentageProvider);
+		final currentYear = DateTime.now().year;
+		final years = List<int>.generate(7, (index) => currentYear - 3 + index);
 
-    if (target == null || allTargets.isEmpty) {
-      return const SizedBox.shrink();
-    }
+		return Container(
+			decoration: BoxDecoration(
+				color: AppColors.primary,
+				borderRadius: BorderRadius.circular(AppBorderRadius.xl),
+				boxShadow: [
+					BoxShadow(
+						color: AppColors.primary.withAlpha(40),
+						blurRadius: 14,
+						offset: const Offset(0, 6),
+					),
+				],
+			),
+			child: Stack(
+				children: [
+					Positioned(
+						top: -34,
+						right: -28,
+						child: Container(
+							width: 120,
+							height: 120,
+							decoration: BoxDecoration(
+								color: AppColors.white.withAlpha(22),
+								shape: BoxShape.circle,
+							),
+						),
+					),
+					Positioned(
+						bottom: -28,
+						left: -16,
+						child: Container(
+							width: 86,
+							height: 86,
+							decoration: BoxDecoration(
+								color: AppColors.white.withAlpha(18),
+								shape: BoxShape.circle,
+							),
+						),
+					),
+					Padding(
+						padding: const EdgeInsets.all(AppSpacing.lg),
+						child: Column(
+							crossAxisAlignment: CrossAxisAlignment.stretch,
+							children: [
+								Row(
+									children: [
+										const Icon(Iconsax.wallet_2, color: AppColors.white),
+										const SizedBox(width: AppSpacing.sm),
+										Text(
+											'Monthly Target',
+											style: AppTypography.tagline.copyWith(
+												color: AppColors.white,
+												fontWeight: FontWeight.w700,
+											),
+										),
+									],
+								),
+								const SizedBox(height: AppSpacing.md),
+								Row(
+									children: [
+										Expanded(
+											child: _selectorContainer(
+												child: DropdownButtonHideUnderline(
+													child: DropdownButton<int>(
+														value: selectedMonth.month,
+														dropdownColor: AppColors.white,
+														icon: const Icon(
+															Iconsax.arrow_down_1,
+															color: AppColors.white,
+															size: 18,
+														),
+														style: AppTypography.body.copyWith(
+															color: AppColors.white,
+														),
+														items: List.generate(12, (index) {
+															final monthNumber = index + 1;
+															return DropdownMenuItem<int>(
+																value: monthNumber,
+																child: Text(
+																	_months[index],
+																	style: AppTypography.body.copyWith(
+																		color: AppColors.primary,
+																		fontWeight: FontWeight.w500,
+																	),
+																),
+															);
+														}),
+																selectedItemBuilder: (context) {
+																	return List.generate(12, (index) {
+																		return Text(
+																			_months[index],
+																			style: AppTypography.body.copyWith(
+																				color: AppColors.white,
+																				fontWeight: FontWeight.w600,
+																			),
+																		);
+																	});
+																},
+														onChanged: (month) {
+															if (month == null) return;
+															homeNotifier.setSelectedMonthYear(
+																year: selectedMonth.year,
+																month: month,
+															);
+														},
+													),
+												),
+											),
+										),
+										const SizedBox(width: AppSpacing.sm),
+										Expanded(
+											child: _selectorContainer(
+												child: DropdownButtonHideUnderline(
+													child: DropdownButton<int>(
+														value: selectedMonth.year,
+														dropdownColor: AppColors.white,
+														icon: const Icon(
+															Iconsax.arrow_down_1,
+															color: AppColors.white,
+															size: 18,
+														),
+														style: AppTypography.body.copyWith(
+															color: AppColors.white,
+														),
+														items: years.map((year) {
+															return DropdownMenuItem<int>(
+																value: year,
+																child: Text(
+																	year.toString(),
+																	style: AppTypography.body.copyWith(
+																		color: AppColors.primary,
+																		fontWeight: FontWeight.w500,
+																	),
+																),
+															);
+														}).toList(),
+																selectedItemBuilder: (context) {
+																	return years.map((year) {
+																		return Text(
+																			year.toString(),
+																			style: AppTypography.body.copyWith(
+																				color: AppColors.white,
+																				fontWeight: FontWeight.w600,
+																			),
+																		);
+																	}).toList();
+																},
+														onChanged: (year) {
+															if (year == null) return;
+															homeNotifier.setSelectedMonthYear(
+																year: year,
+																month: selectedMonth.month,
+															);
+														},
+													),
+												),
+											),
+										),
+									],
+								),
+								const SizedBox(height: AppSpacing.lg),
+								_amountTile(
+									title: 'Target Amount',
+									value: _currency(monthlyTarget.targetAmount),
+								),
+								const SizedBox(height: AppSpacing.sm),
+								_amountTile(
+									title: 'Target Achieved',
+									value: _currency(monthlyTarget.achievedAmount),
+								),
+								const SizedBox(height: AppSpacing.sm),
+								_amountTile(
+									title: 'Yet to Achieve',
+									value: _currency(monthlyTarget.remainingAmount),
+								),
+								const SizedBox(height: AppSpacing.md),
+								ClipRRect(
+									borderRadius: AppBorderRadius.maxRadius,
+									child: LinearProgressIndicator(
+										minHeight: 8,
+										value: monthlyTarget.achievedPercentage,
+										backgroundColor: AppColors.white.withAlpha(45),
+										color: AppColors.secondary,
+									),
+								),
+							],
+						),
+					),
+				],
+			),
+		);
+	}
 
-    final statusColor = _getStatusColor(statusInfo.status);
-    final statusIcon = _getStatusIcon(statusInfo.status);
+	Widget _selectorContainer({required Widget child}) {
+		return Container(
+			padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+			decoration: BoxDecoration(
+				color: AppColors.white.withAlpha(32),
+				borderRadius: BorderRadius.circular(AppBorderRadius.md),
+				border: Border.all(color: AppColors.white.withAlpha(68)),
+			),
+			child: child,
+		);
+	}
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-
-        boxShadow: [
-          BoxShadow(
-            color: statusColor.withAlpha(25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with month selector
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: statusColor.withAlpha(38),
-                    borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                  ),
-                  child: Icon(
-                    statusIcon,
-                    color: statusColor,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Monthly Target',
-                        style: AppTypography.tagline.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      // Month selector dropdown
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight,
-                          borderRadius: BorderRadius.circular(AppBorderRadius.sm),
-                        ),
-                        child: DropdownButton<int>(
-                          value: selectedMonthIndex,
-                          onChanged: (newIndex) {
-                            if (newIndex != null) {
-                              ref
-                                  .read(targetNotifierProvider.notifier)
-                                  .selectMonth(newIndex);
-                            }
-                          },
-                          isDense: true,
-                          isExpanded: false,
-                          underline: const SizedBox.shrink(),
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          iconEnabledColor: AppColors.primary,
-                          items: List.generate(
-                            allTargets.length,
-                            (index) => DropdownMenuItem<int>(
-                              value: index,
-                              child: Text('${allTargets[index].month} ${allTargets[index].year}'),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Status message
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: statusColor.withAlpha(25),
-                borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                border: Border.all(color: statusColor.withAlpha(76)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    statusInfo.label,
-                    style: AppTypography.body.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    statusInfo.description,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: statusColor.withAlpha(204),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Progress bar
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Progress',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.quaternary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '${percentage.toStringAsFixed(1)}%',
-                      style: AppTypography.body.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppBorderRadius.sm),
-                  child: LinearProgressIndicator(
-                    value: (percentage / 100).clamp(0.0, 1.0),
-                    minHeight: 10,
-                    backgroundColor: AppColors.surface,
-                    valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Target breakdown
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTargetMetric(
-                    title: 'Target',
-                    amount: target.targetAmount,
-                    icon: Iconsax.flag,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: _buildTargetMetric(
-                    title: 'Achieved',
-                    amount: target.achievedAmount,
-                    icon: Iconsax.tick_square,
-                    color: const Color(0xFF4CAF50),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: _buildTargetMetric(
-                    title: 'Left',
-                    amount: target.remainingAmount,
-                    icon: Iconsax.clipboard,
-                    color: statusColor,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTargetMetric({
-    required String title,
-    required double amount,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: color.withAlpha(20),
-        borderRadius: BorderRadius.circular(AppBorderRadius.md),
-        border: Border.all(color: color.withAlpha(51)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: color,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Expanded(
-                child: Text(
-                  title,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.quaternary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            _formatCurrency(amount),
-            style: AppTypography.body.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
+	Widget _amountTile({required String title, required String value}) {
+		return Container(
+			padding: const EdgeInsets.symmetric(
+				horizontal: AppSpacing.md,
+				vertical: AppSpacing.sm,
+			),
+			decoration: BoxDecoration(
+				color: AppColors.white.withAlpha(20),
+				borderRadius: BorderRadius.circular(AppBorderRadius.md),
+			),
+			child: Row(
+				mainAxisAlignment: MainAxisAlignment.spaceBetween,
+				children: [
+					Text(
+						title,
+						style: AppTypography.bodySmall.copyWith(
+							color: AppColors.white.withAlpha(220),
+						),
+					),
+					Text(
+						value,
+						style: AppTypography.bodyLarge.copyWith(
+							color: AppColors.white,
+							fontWeight: FontWeight.w700,
+						),
+					),
+				],
+			),
+		);
+	}
 }
