@@ -71,7 +71,7 @@ class MRQuickActionsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      [Iconsax.chart, 'Analytics'],
+      [Iconsax.route_square, 'Month Plan'],
       [FontAwesomeIcons.gifts, 'Gifts'],
       [FontAwesomeIcons.userDoctor, 'My Doctors'],
       [Iconsax.calendar_tick, 'Appointments'],
