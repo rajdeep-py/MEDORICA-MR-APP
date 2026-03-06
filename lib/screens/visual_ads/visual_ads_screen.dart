@@ -238,7 +238,7 @@ class _VisualAdsScreenState extends ConsumerState<VisualAdsScreen> {
                                 ),
                               ),
                             );
-                          }).toList(),
+                          }),
                         ],
                         onChanged: (value) {
                           ref.read(filteredVisualAdsProvider.notifier).state = value;
