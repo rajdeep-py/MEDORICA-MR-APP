@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../../theme/app_theme.dart';
+import '../../router/app_router.dart';
 
 class MonthPlanCard extends StatelessWidget {
   const MonthPlanCard({super.key});
@@ -59,28 +61,22 @@ class MonthPlanCard extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      // TODO: Navigate to view month plan screen
-                      // context.push('/month-plan/view');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('View Month Plan - Coming soon'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
+                      context.push(AppRouter.monthPlan);
                     },
                     icon: Icon(
                       Iconsax.eye,
                       size: 18,
-                      color: AppColors.primary,
+                      color: AppColors.white,
                     ),
                     label: Text(
                       'View Plan',
                       style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.primary,
+                        color: AppColors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
                       side: BorderSide(color: AppColors.primary, width: 1.5),
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.md,
@@ -92,44 +88,7 @@ class MonthPlanCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      // TODO: Navigate to create month plan screen
-                      // context.push('/month-plan/create');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Create Month Plan - Coming soon'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    icon: Icon(
-                      Iconsax.add_circle,
-                      size: 18,
-                      color: AppColors.white,
-                    ),
-                    label: Text(
-                      'Create Plan',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.md,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                      ),
-                      elevation: 0,
-                    ),
-                  ),
-                ),
+                
               ],
             ),
           ],

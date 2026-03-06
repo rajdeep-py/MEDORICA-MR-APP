@@ -44,14 +44,17 @@ class MRQuickActionsCard extends StatelessWidget {
 
   void _handleAction(BuildContext context, String label) {
     switch (label) {
+      case 'Month Plan':
+        context.push('/month-plan');
+        break;
       case 'Gifts':
         context.push('/gifts');
         break;
       case 'My Doctors':
         context.push('/mr/doctor');
         break;
-      case 'Appointments':
-        context.push('/mr/appointments');
+      case 'Visual Ads':
+        context.push('/visual-ads');
         break;
       case 'Distributors':
         context.push('/mr/distributor');
@@ -74,7 +77,7 @@ class MRQuickActionsCard extends StatelessWidget {
       [Iconsax.route_square, 'Month Plan'],
       [FontAwesomeIcons.gifts, 'Gifts'],
       [FontAwesomeIcons.userDoctor, 'My Doctors'],
-      [Iconsax.calendar_tick, 'Appointments'],
+      [FontAwesomeIcons.image, 'Visual Ads'],
       [Iconsax.truck, 'Distributors'],
       [Iconsax.wallet, 'Salary Slip'],
       [Iconsax.shop, 'Chemists'],

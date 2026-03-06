@@ -20,6 +20,8 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/profile/update_profile_screen.dart';
 import '../screens/about_us/about_us_screen.dart';
 import '../screens/notification/notification_screen.dart';
+import '../screens/month_plan/month_plan_screen.dart';
+import '../screens/visual_ads/visual_ads_screen.dart';
 import '../models/doctor.dart';
 import '../models/chemist_shop.dart';
 
@@ -36,6 +38,8 @@ class AppRouter {
   static const String profile = '/profile';
   static const String aboutUs = '/about-us';
   static const String notifications = '/notifications';
+  static const String monthPlan = '/month-plan';
+  static const String visualAds = '/visual-ads';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -208,6 +212,16 @@ class AppRouter {
             },
           ),
         ],
+      ),
+      GoRoute(
+        path: monthPlan,
+        name: 'monthPlan',
+        builder: (context, state) => const MonthPlanScreen(),
+      ),
+      GoRoute(
+        path: visualAds,
+        name: 'visualAds',
+        builder: (context, state) => const VisualAdsScreen(),
       ),
     ],
   );
