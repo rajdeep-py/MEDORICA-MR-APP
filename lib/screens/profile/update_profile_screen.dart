@@ -18,8 +18,10 @@ class UpdateProfileScreen extends ConsumerStatefulWidget {
 
 class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
   final _formKey = GlobalKey<FormState>();
+  late TextEditingController _mrIdController;
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
+  late TextEditingController _altPhoneController;
   late TextEditingController _emailController;
   late TextEditingController _accountNoController;
   late TextEditingController _bankNameController;
@@ -42,8 +44,12 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     if (_controllersInitialized) return;
 
     final profile = ref.read(profileProvider);
+    _mrIdController = TextEditingController(text: profile?.mrId ?? '');
     _nameController = TextEditingController(text: profile?.name ?? '');
     _phoneController = TextEditingController(text: profile?.phone ?? '');
+    _altPhoneController = TextEditingController(
+      text: profile?.altPhoneNo ?? '',
+    );
     _emailController = TextEditingController(text: profile?.email ?? '');
     _accountNoController = TextEditingController(
       text: profile?.bankAccountNo ?? '',
@@ -137,8 +143,10 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
   @override
   void dispose() {
     if (_controllersInitialized) {
+      _mrIdController.dispose();
       _nameController.dispose();
       _phoneController.dispose();
+      _altPhoneController.dispose();
       _emailController.dispose();
       _accountNoController.dispose();
       _bankNameController.dispose();
@@ -238,6 +246,9 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
             .updateCurrentMrProfile(
               name: _nameController.text.trim(),
               phone: _phoneController.text.trim(),
+              altPhoneNo: _altPhoneController.text.trim().isEmpty
+                  ? null
+                  : _altPhoneController.text.trim(),
               email: _emailController.text.trim(),
               bankAccountNo: _accountNoController.text.trim(),
               bankName: _bankNameController.text.trim(),
@@ -395,6 +406,16 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: AppSpacing.md),
+                          // MR ID (Read-only)
+                          TextFormField(
+                            controller: _mrIdController,
+                            enabled: false,
+                            decoration: _buildInputDecoration(
+                              hintText: 'MR ID',
+                              prefixIcon: Iconsax.user_tag,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
                           // Name
                           TextFormField(
                             controller: _nameController,
@@ -424,6 +445,16 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                               }
                               return null;
                             },
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          // Alternative Phone
+                          TextFormField(
+                            controller: _altPhoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: _buildInputDecoration(
+                              hintText: 'Alternative Phone Number',
+                              prefixIcon: Iconsax.call_calling,
+                            ),
                           ),
                           const SizedBox(height: AppSpacing.md),
                           // Email

@@ -58,37 +58,21 @@ class ProfileHeaderCard extends StatelessWidget {
           const Divider(height: 1, color: AppColors.border),
           const SizedBox(height: AppSpacing.lg),
 
-          // Phone and Email
+          // MR ID and Territories
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Phone
-              Column(
-                children: [
-                  const Icon(Icons.phone, color: AppColors.primary, size: 24),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    profile.phone,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.quaternary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-              // Divider
-              Container(width: 1, height: 50, color: AppColors.border),
-              // Territory
+              // MR ID
               Column(
                 children: [
                   const Icon(
-                    Icons.location_on,
+                    Icons.badge_outlined,
                     color: AppColors.primary,
                     size: 24,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    profile.territory,
+                    profile.mrId,
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.quaternary,
                     ),
@@ -96,6 +80,7 @@ class ProfileHeaderCard extends StatelessWidget {
                   ),
                 ],
               ),
+              
             ],
           ),
         ],
@@ -126,4 +111,5 @@ class ProfileHeaderCard extends StatelessWidget {
 
     return const Icon(Icons.person, size: 50, color: AppColors.primary);
   }
+
 }

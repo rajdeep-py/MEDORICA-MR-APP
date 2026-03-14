@@ -121,6 +121,7 @@ class ProfileNotifier extends StateNotifier<MedicalRepresentative?> {
   Future<void> updateCurrentMrProfile({
     required String name,
     required String phone,
+    String? altPhoneNo,
     required String email,
     required String bankAccountNo,
     required String bankName,
@@ -146,7 +147,7 @@ class ProfileNotifier extends StateNotifier<MedicalRepresentative?> {
             password: (password != null && password.trim().isNotEmpty)
                 ? password
                 : (current.password ?? ''),
-            altPhoneNo: current.altPhoneNo,
+            altPhoneNo: altPhoneNo ?? current.altPhoneNo,
             email: email,
             address: current.address,
             joiningDate: current.joiningDate,
