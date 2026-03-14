@@ -9,103 +9,122 @@ class DistributorContactCard extends StatelessWidget {
 
   const DistributorContactCard({super.key, required this.distributor});
 
-  Future<void> _makePhoneCall(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri);
+  Future<void> _launchDialer(String phoneNo) async {
+    final phoneUrl = 'tel:${phoneNo.replaceAll(RegExp(r'[^\d+]'), '')}';
+    if (await canLaunchUrl(Uri.parse(phoneUrl))) {
+      await launchUrl(
+        Uri.parse(phoneUrl),
+        mode: LaunchMode.externalApplication,
+      );
     }
   }
 
-  Future<void> _sendEmail(String email) async {
-    final Uri launchUri = Uri(
-      scheme: 'mailto',
-      path: email,
-    );
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri);
+  Future<void> _launchEmail(String email) async {
+    final emailUrl = 'mailto:$email';
+    if (await canLaunchUrl(Uri.parse(emailUrl))) {
+      await launchUrl(
+        Uri.parse(emailUrl),
+        mode: LaunchMode.externalApplication,
+      );
     }
   }
 
-  Future<void> _openMap(String location) async {
-    final Uri launchUri = Uri.parse(
-      'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location)}',
-    );
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+  Future<void> _launchMaps(String address) async {
+    final mapsUrl =
+        'https://www.google.com/maps/search/${Uri.encodeComponent(address)}';
+    if (await canLaunchUrl(Uri.parse(mapsUrl))) {
+      await launchUrl(Uri.parse(mapsUrl), mode: LaunchMode.externalApplication);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final location = distributor.location ?? distributor.address;
+    final hasBankDetails =
+        (distributor.bankName?.isNotEmpty ?? false) ||
+        (distributor.bankAccountNo?.isNotEmpty ?? false) ||
+        (distributor.branchName?.isNotEmpty ?? false) ||
+        (distributor.ifscCode?.isNotEmpty ?? false);
+
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: AppColors.primary.withAlpha(12),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(color: AppColors.primaryLight, width: 1),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
-                  borderRadius: BorderRadius.circular(AppBorderRadius.sm),
-                ),
-                child: const Icon(
-                  Iconsax.call_calling,
-                  color: AppColors.primary,
-                  size: 20,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Contact Information',
+              style: AppTypography.h3.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Phone
+            GestureDetector(
+              onTap: () => _launchDialer(distributor.phoneNo),
+              child: _ContactItem(
+                icon: Iconsax.call,
+                label: 'Phone',
+                value: distributor.phoneNo,
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Email
+            if (distributor.email != null && distributor.email!.isNotEmpty)
+              GestureDetector(
+                onTap: () => _launchEmail(distributor.email!),
+                child: _ContactItem(
+                  icon: Iconsax.sms,
+                  label: 'Email',
+                  value: distributor.email!,
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                'Contact Information',
-                style: AppTypography.h3.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
+            if (distributor.email != null && distributor.email!.isNotEmpty)
+              const SizedBox(height: 10),
+            // Address
+            if (location != null && location.isNotEmpty)
+              GestureDetector(
+                onTap: () => _launchMaps(location),
+                child: _ContactItem(
+                  icon: Iconsax.location,
+                  label: 'Location',
+                  value: location,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          // Phone Number
-          _ContactItem(
-            icon: Iconsax.call,
-            label: 'Phone',
-            value: distributor.phoneNumber,
-            onTap: () => _makePhoneCall(distributor.phoneNumber),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          // Email
-          _ContactItem(
-            icon: Iconsax.sms,
-            label: 'Email',
-            value: distributor.email,
-            onTap: () => _sendEmail(distributor.email),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          // Location
-          _ContactItem(
-            icon: Iconsax.location,
-            label: 'Location',
-            value: distributor.location,
-            onTap: () => _openMap(distributor.location),
-          ),
-        ],
+            if (location != null && location.isNotEmpty && hasBankDetails)
+              const SizedBox(height: 10),
+            if (hasBankDetails)
+              _ContactItem(
+                icon: Iconsax.bank,
+                label: 'Bank Details',
+                value:
+                    [
+                          distributor.bankName,
+                          distributor.bankAccountNo,
+                          distributor.branchName,
+                          distributor.ifscCode,
+                        ]
+                        .whereType<String>()
+                        .where((item) => item.isNotEmpty)
+                        .join(' • '),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -115,72 +134,64 @@ class _ContactItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final VoidCallback onTap;
 
   const _ContactItem({
     required this.icon,
     required this.label,
     required this.value,
-    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppBorderRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppBorderRadius.md),
-          border: Border.all(
-            color: AppColors.border,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.primaryLight.withAlpha(150),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 18),
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: BorderRadius.circular(AppBorderRadius.sm),
-              ),
-              child: Icon(
-                icon,
-                color: AppColors.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.quaternary,
-                    ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.quaternary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    value,
-                    style: AppTypography.body.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
                   ),
-                ],
-              ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            const Icon(
-              Iconsax.arrow_right_3,
-              color: AppColors.quaternary,
-              size: 20,
-            ),
-          ],
-        ),
+          ),
+          Icon(Iconsax.arrow_right, color: AppColors.quaternary, size: 18),
+        ],
       ),
     );
   }

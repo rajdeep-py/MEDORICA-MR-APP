@@ -1,65 +1,93 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import '../../models/distributor.dart';
 import '../../theme/app_theme.dart';
 
 class DistributorDescriptionCard extends StatelessWidget {
-  final String description;
+  final Distributor distributor;
 
-  const DistributorDescriptionCard({super.key, required this.description});
+  const DistributorDescriptionCard({super.key, required this.distributor});
 
   @override
   Widget build(BuildContext context) {
+    final description = distributor.description?.trim();
+
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: AppColors.primary.withAlpha(12),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(color: AppColors.primaryLight, width: 1),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
-                  borderRadius: BorderRadius.circular(AppBorderRadius.sm),
-                ),
-                child: const Icon(
-                  Iconsax.document_text,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'About',
+              style: AppTypography.h3.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              description == null || description.isEmpty
+                  ? 'No distributor description available.'
+                  : description,
+              style: AppTypography.body.copyWith(
+                color: AppColors.quaternary,
+                height: 1.6,
+                fontSize: 13,
+              ),
+              textAlign: TextAlign.justify,
+            ),
+            if (distributor.products.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(
+                'Products',
+                style: AppTypography.body.copyWith(
                   color: AppColors.primary,
-                  size: 20,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                'About Distributor',
-                style: AppTypography.h3.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: distributor.products
+                    .map(
+                      (product) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight.withAlpha(110),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          product,
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          // Description
-          Text(
-            description,
-            style: AppTypography.body.copyWith(
-              color: AppColors.quaternary,
-              height: 1.6,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,94 +1,82 @@
 import 'package:flutter_riverpod/legacy.dart';
+
 import '../models/distributor.dart';
+import '../services/distributor/distributor_services.dart';
 
-class DistributorNotifier extends StateNotifier<List<Distributor>> {
-  DistributorNotifier() : super([]) {
-    _loadDistributors();
+class DistributorState {
+  final List<Distributor> distributors;
+  final bool isLoading;
+  final String? error;
+
+  const DistributorState({
+    this.distributors = const [],
+    this.isLoading = false,
+    this.error,
+  });
+
+  DistributorState copyWith({
+    List<Distributor>? distributors,
+    bool? isLoading,
+    String? error,
+  }) {
+    return DistributorState(
+      distributors: distributors ?? this.distributors,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
   }
+}
 
-  // Load distributors - mock data for now
-  void _loadDistributors() {
-    state = [
-      Distributor(
-        id: '1',
-        name: 'MedSupply Distributors',
-        phoneNumber: '+880 1700 777888',
-        email: 'contact@medsupply.com',
-        photo: 'https://via.placeholder.com/400x300?text=MedSupply+Distributors',
-        location: '45 Industrial Area, Dhaka',
-        description:
-            'Leading pharmaceutical distributor with over 15 years of experience. We supply quality medicines from all major brands to pharmacies across the country.',
-        minimumOrderValue: 'Rs. 50,000',
-        deliveryTime: 'Same Day',
-      ),
-      Distributor(
-        id: '2',
-        name: 'PharmaCare Distribution',
-        phoneNumber: '+880 1800 999000',
-        email: 'info@pharmacare.com',
-        photo: 'https://via.placeholder.com/400x300?text=PharmaCare+Distribution',
-        location: '123 Trade Center, Chittagong',
-        description:
-            'Trusted distributor specializing in imported and generic medicines. Fast delivery and competitive pricing with excellent customer service.',
-        minimumOrderValue: 'Rs. 75,000',
-        deliveryTime: '24 Hours',
-      ),
-      Distributor(
-        id: '3',
-        name: 'Global Pharma Supply',
-        phoneNumber: '+880 1900 111222',
-        email: 'sales@globalpharma.com',
-        photo: 'https://via.placeholder.com/400x300?text=Global+Pharma+Supply',
-        location: '78 Business Hub, Dhaka',
-        description:
-            'International standard pharmaceutical distribution with temperature-controlled storage. We ensure quality and timely delivery of all medical supplies.',
-        minimumOrderValue: 'Rs. 100,000',
-        deliveryTime: '48 Hours',
-      ),
-    ];
-  }
+class DistributorNotifier extends StateNotifier<DistributorState> {
+  DistributorNotifier(this._distributorServices)
+    : super(const DistributorState());
 
-  // Add a new distributor
-  void addDistributor(Distributor distributor) {
-    state = [...state, distributor.copyWith(id: DateTime.now().toString())];
-  }
+  final DistributorServices _distributorServices;
 
-  // Update a distributor
-  void updateDistributor(Distributor updatedDistributor) {
-    state = [
-      for (final distributor in state)
-        if (distributor.id == updatedDistributor.id)
-          updatedDistributor
-        else
-          distributor,
-    ];
-  }
+  Future<void> loadDistributors({bool forceRefresh = false}) async {
+    if (!forceRefresh && state.distributors.isNotEmpty) {
+      return;
+    }
 
-  // Delete a distributor
-  void deleteDistributor(String id) {
-    state = [
-      for (final distributor in state)
-        if (distributor.id != id) distributor
-    ];
-  }
+    state = state.copyWith(isLoading: true, error: null);
 
-  // Get a distributor by id
-  Distributor? getDistributorById(String id) {
     try {
-      return state.firstWhere((distributor) => distributor.id == id);
-    } catch (e) {
-      return null;
+      final distributors = await _distributorServices.fetchAllDistributors();
+      state = state.copyWith(
+        distributors: distributors,
+        isLoading: false,
+        error: null,
+      );
+    } catch (error) {
+      state = state.copyWith(isLoading: false, error: _readErrorMessage(error));
     }
   }
 
-  // Search distributors
-  List<Distributor> searchDistributors(String query) {
-    if (query.isEmpty) return state;
-    final lowerQuery = query.toLowerCase();
-    return state
-        .where((distributor) =>
-            distributor.name.toLowerCase().contains(lowerQuery) ||
-            distributor.location.toLowerCase().contains(lowerQuery))
-        .toList();
+  Future<Distributor?> fetchDistributorById(String id) async {
+    for (final distributor in state.distributors) {
+      if (distributor.id == id) {
+        return distributor;
+      }
+    }
+
+    try {
+      final distributor = await _distributorServices.fetchDistributorById(id);
+      state = state.copyWith(
+        distributors: [...state.distributors, distributor],
+        error: null,
+      );
+      return distributor;
+    } catch (error) {
+      state = state.copyWith(error: _readErrorMessage(error));
+      rethrow;
+    }
+  }
+
+  String _readErrorMessage(Object error) {
+    final message = error.toString();
+    if (message.startsWith('Exception: ')) {
+      return message.substring('Exception: '.length);
+    }
+    return message;
   }
 }

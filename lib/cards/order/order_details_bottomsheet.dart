@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import '../../models/distributor.dart';
 import '../../models/order.dart';
 import '../../provider/order_provider.dart';
 import '../../provider/doctor_provider.dart';
@@ -17,7 +18,7 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(orderDetailProvider(orderId));
-    
+
     if (order == null) {
       return Container(
         height: 300,
@@ -25,15 +26,20 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
           color: AppColors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: const Center(
-          child: Text('Order not found'),
-        ),
+        child: const Center(child: Text('Order not found')),
       );
     }
 
     final doctor = ref.watch(doctorDetailProvider(order.doctorId));
-    final chemistShop = ref.watch(chemistShopDetailProvider(order.chemistShopId));
-    final distributor = ref.watch(distributorDetailProvider(order.distributorId));
+    final chemistShop = ref.watch(
+      chemistShopDetailProvider(order.chemistShopId),
+    );
+    final distributorAsync = ref.watch(
+      distributorByIdProvider(order.distributorId),
+    );
+    final distributor = distributorAsync is AsyncData<Distributor?>
+        ? distributorAsync.value
+        : null;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
@@ -104,13 +110,20 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
                     children: [
                       _buildStatusBadge(order.status),
                       InkWell(
-                        onTap: () => _showStatusChangeDialog(context, ref, order),
+                        onTap: () =>
+                            _showStatusChangeDialog(context, ref, order),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Iconsax.edit, size: 16, color: AppColors.primary),
+                              const Icon(
+                                Iconsax.edit,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
                               const SizedBox(width: AppSpacing.xs),
                               Text(
                                 'Change Status',
@@ -133,13 +146,17 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
                     _buildInfoRow(
                       icon: Iconsax.calendar,
                       label: 'Order Date',
-                      value: DateFormat('dd MMM yyyy, hh:mm a').format(order.orderDate),
+                      value: DateFormat(
+                        'dd MMM yyyy, hh:mm a',
+                      ).format(order.orderDate),
                     ),
                     if (order.deliveryDate != null)
                       _buildInfoRow(
                         icon: Iconsax.truck_fast,
                         label: 'Delivery Date',
-                        value: DateFormat('dd MMM yyyy').format(order.deliveryDate!),
+                        value: DateFormat(
+                          'dd MMM yyyy',
+                        ).format(order.deliveryDate!),
                       ),
                   ]),
                   const SizedBox(height: AppSpacing.lg),
@@ -200,21 +217,25 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
                     _buildInfoRow(
                       icon: Iconsax.call,
                       label: 'Phone',
-                      value: distributor?.phoneNumber ?? 'N/A',
+                      value: distributor?.phoneNo ?? 'N/A',
                     ),
                     if (distributor != null)
                       _buildInfoRow(
                         icon: Iconsax.timer_1,
                         label: 'Delivery Time',
-                        value: distributor.deliveryTime,
+                        value: distributor.deliveryTime ?? 'N/A',
                       ),
                   ]),
                   const SizedBox(height: AppSpacing.lg),
 
                   // Medicines
-                  _buildSectionHeader('Medicines (${order.medicines.length} items)'),
+                  _buildSectionHeader(
+                    'Medicines (${order.medicines.length} items)',
+                  ),
                   const SizedBox(height: AppSpacing.sm),
-                  ...order.medicines.map((medicine) => _buildMedicineCard(medicine)),
+                  ...order.medicines.map(
+                    (medicine) => _buildMedicineCard(medicine),
+                  ),
                   const SizedBox(height: AppSpacing.lg),
 
                   // Notes
@@ -267,10 +288,12 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
       ),
       child: Column(
         children: children
-            .map((child) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  child: child,
-                ))
+            .map(
+              (child) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                child: child,
+              ),
+            )
             .toList(),
       ),
     );
@@ -284,11 +307,7 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppColors.primary,
-        ),
+        Icon(icon, size: 16, color: AppColors.primary),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Column(
@@ -431,11 +450,7 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            _getStatusIcon(status),
-            size: 16,
-            color: textColor,
-          ),
+          Icon(_getStatusIcon(status), size: 16, color: textColor),
           const SizedBox(width: AppSpacing.xs),
           Text(
             status.displayName,
@@ -466,7 +481,11 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
     }
   }
 
-  void _showStatusChangeDialog(BuildContext context, WidgetRef ref, Order order) {
+  void _showStatusChangeDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Order order,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -497,11 +516,15 @@ class OrderDetailsBottomSheet extends ConsumerWidget {
                   ? const Icon(Iconsax.tick_circle, color: AppColors.primary)
                   : null,
               onTap: () {
-                ref.read(orderProvider.notifier).updateOrderStatus(order.id, status);
+                ref
+                    .read(orderProvider.notifier)
+                    .updateOrderStatus(order.id, status);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Order status updated to ${status.displayName}'),
+                    content: Text(
+                      'Order status updated to ${status.displayName}',
+                    ),
                     backgroundColor: AppColors.success,
                   ),
                 );

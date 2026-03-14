@@ -1,34 +1,53 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+
 import '../models/distributor.dart';
 import '../notifiers/distributor_notifier.dart';
+import '../services/distributor/distributor_services.dart';
 
-// Provider for the list of distributors
-final distributorProvider =
-    StateNotifierProvider<DistributorNotifier, List<Distributor>>((ref) {
-  return DistributorNotifier();
+final distributorServicesProvider = Provider<DistributorServices>((ref) {
+  return DistributorServices();
 });
 
-// Provider for a single distributor by ID
-final distributorDetailProvider =
-    Provider.family<Distributor?, String>((ref, id) {
-  final distributors = ref.watch(distributorProvider);
-  try {
-    return distributors.firstWhere((distributor) => distributor.id == id);
-  } catch (e) {
-    return null;
+final distributorNotifierProvider =
+    StateNotifierProvider<DistributorNotifier, DistributorState>((ref) {
+      final notifier = DistributorNotifier(
+        ref.read(distributorServicesProvider),
+      );
+      unawaited(notifier.loadDistributors());
+      return notifier;
+    });
+
+final distributorListProvider = Provider<List<Distributor>>((ref) {
+  return ref.watch(distributorNotifierProvider).distributors;
+});
+
+final distributorLoadingProvider = Provider<bool>((ref) {
+  return ref.watch(distributorNotifierProvider).isLoading;
+});
+
+final distributorErrorProvider = Provider<String?>((ref) {
+  return ref.watch(distributorNotifierProvider).error;
+});
+
+final filteredDistributorsProvider = StateProvider<List<Distributor>>((ref) {
+  return ref.watch(distributorListProvider);
+});
+
+final distributorByIdProvider = FutureProvider.family<Distributor?, String>((
+  ref,
+  id,
+) async {
+  final distributors = ref.watch(distributorListProvider);
+  for (final distributor in distributors) {
+    if (distributor.id == id) {
+      return distributor;
+    }
   }
-});
 
-// Provider for searched distributors
-final searchDistributorProvider =
-    Provider.family<List<Distributor>, String>((ref, query) {
-  final distributors = ref.watch(distributorProvider);
-  if (query.isEmpty) return distributors;
-  final lowerQuery = query.toLowerCase();
-  return distributors
-      .where((distributor) =>
-          distributor.name.toLowerCase().contains(lowerQuery) ||
-          distributor.location.toLowerCase().contains(lowerQuery))
-      .toList();
+  return ref
+      .read(distributorNotifierProvider.notifier)
+      .fetchDistributorById(id);
 });

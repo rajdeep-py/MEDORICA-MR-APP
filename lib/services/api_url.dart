@@ -29,9 +29,28 @@ class ApiUrl {
   static const String _mrBase = '/onboarding/mr';
   // Login Endpoint
   static const String mrLogin = '$_mrBase/login';
-
   // Get Profile by ID Endpoint
   static String mrGetById(String mrId) => '$_mrBase/get-by/$mrId';
   // Update Profile by ID Endpoint
   static String mrUpdateById(String mrId) => '$_mrBase/update-by/$mrId';
+
+  // Distributor Endpoints
+  static const String distributorGetAll = '/distributor/get-all';
+  static String distributorGetById(String distId) =>
+      '/distributor/get-by/$distId';
+
+  static String getFullUrl(String path) {
+    final String trimmed = path.trim();
+    if (trimmed.isEmpty) {
+      return baseUrl;
+    }
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+
+    final String normalizedPath = trimmed.startsWith('/')
+        ? trimmed
+        : '/$trimmed';
+    return '$baseUrl$normalizedPath';
+  }
 }

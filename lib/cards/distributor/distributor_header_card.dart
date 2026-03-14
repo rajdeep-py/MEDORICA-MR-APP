@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
 import '../../models/distributor.dart';
 import '../../theme/app_theme.dart';
 
@@ -10,110 +9,113 @@ class DistributorHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Background Image with Dark Overlay
-        Container(
-          height: 260,
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(AppBorderRadius.xl),
-              bottomRight: Radius.circular(AppBorderRadius.xl),
-            ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      height: 260,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withAlpha(120),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(AppBorderRadius.xl),
-              bottomRight: Radius.circular(AppBorderRadius.xl),
-            ),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                distributor.photo.startsWith('http')
-                    ? Image.network(
-                        distributor.photo,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
-                          color: AppColors.surface,
-                          child: const Icon(
-                            Iconsax.truck,
-                            size: 80,
-                            color: AppColors.quaternary,
-                          ),
-                        ),
-                      )
-                    : Image.asset(
-                        distributor.photo,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Container(
-                          color: AppColors.surface,
-                          child: const Icon(
-                            Iconsax.truck,
-                            size: 80,
-                            color: AppColors.quaternary,
-                          ),
-                        ),
-                      ),
-                // Dark Overlay
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withAlpha(76),
-                        Colors.black.withAlpha(178),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        // Distributor Name and Location
-        Positioned(
-          bottom: AppSpacing.xl,
-          left: AppSpacing.xl,
-          right: AppSpacing.xl,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Distributor Name
-              Text(
-                distributor.name,
-                style: AppTypography.h1.copyWith(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Background
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.primary, AppColors.primary.withAlpha(180)],
               ),
-              const SizedBox(height: AppSpacing.sm),
-              // Location
-              Row(
-                children: [
-                  const Icon(
-                    Iconsax.location,
-                    size: 20,
-                    color: AppColors.white,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text(
-                      distributor.location,
-                      style: AppTypography.body.copyWith(
+            ),
+            child: distributor.photoUrl != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.network(
+                      distributor.photoUrl!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  )
+                : null,
+          ),
+          // Black Overlay
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withAlpha(80),
+                  Colors.black.withAlpha(200),
+                ],
+              ),
+            ),
+          ),
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Empty space at top
+                const SizedBox(height: 40),
+                // Name and Location at bottom
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      distributor.name,
+                      style: AppTypography.h2.copyWith(
                         color: AppColors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 28,
+                        letterSpacing: 0.5,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.white.withAlpha(30),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            distributor.id,
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -3,14 +3,9 @@ import 'package:iconsax/iconsax.dart';
 import '../../theme/app_theme.dart';
 
 class DistributorSearchFilterCard extends StatefulWidget {
-  final Function(String) onSearchChanged;
-  final VoidCallback? onFilterTapped;
+  final Function(String) onSearch;
 
-  const DistributorSearchFilterCard({
-    super.key,
-    required this.onSearchChanged,
-    this.onFilterTapped,
-  });
+  const DistributorSearchFilterCard({super.key, required this.onSearch});
 
   @override
   State<DistributorSearchFilterCard> createState() =>
@@ -19,7 +14,13 @@ class DistributorSearchFilterCard extends StatefulWidget {
 
 class _DistributorSearchFilterCardState
     extends State<DistributorSearchFilterCard> {
-  final TextEditingController _searchController = TextEditingController();
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
 
   @override
   void dispose() {
@@ -30,72 +31,47 @@ class _DistributorSearchFilterCardState
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: AppColors.primary.withAlpha(12),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(color: AppColors.primaryLight, width: 1),
       ),
       child: Row(
         children: [
-          // Search Field
           Expanded(
             child: TextField(
               controller: _searchController,
-              onChanged: widget.onSearchChanged,
+              onChanged: widget.onSearch,
               decoration: InputDecoration(
-                hintText: 'Search distributors...',
+                hintText: 'Search distributor...',
                 hintStyle: AppTypography.body.copyWith(
                   color: AppColors.quaternary,
                 ),
+                border: InputBorder.none,
                 prefixIcon: const Icon(
                   Iconsax.search_normal,
                   color: AppColors.quaternary,
-                  size: 20,
+                  size: 18,
                 ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(
-                          Icons.clear,
-                          color: AppColors.quaternary,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          _searchController.clear();
-                          widget.onSearchChanged('');
-                          setState(() {});
-                        },
-                      )
-                    : null,
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.md,
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 34,
+                  minHeight: 34,
                 ),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 6),
               ),
+              style: AppTypography.body.copyWith(color: AppColors.primary),
             ),
           ),
-          // Filter Button
-          if (widget.onFilterTapped != null) ...[
-            Container(
-              height: 40,
-              width: 1,
-              color: AppColors.border,
-            ),
-            IconButton(
-              icon: const Icon(
-                Iconsax.filter,
-                color: AppColors.primary,
-                size: 20,
-              ),
-              onPressed: widget.onFilterTapped,
-            ),
-          ],
         ],
       ),
     );

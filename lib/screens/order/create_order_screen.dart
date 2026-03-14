@@ -19,13 +19,13 @@ class CreateOrderScreen extends ConsumerStatefulWidget {
 
 class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   String? _selectedDoctorId;
   String? _selectedChemistShopId;
   String? _selectedDistributorId;
   DateTime? _deliveryDate;
   final _notesController = TextEditingController();
-  
+
   final List<_MedicineFormItem> _medicines = [];
 
   @override
@@ -79,17 +79,19 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
       // Create medicine list
       final medicines = _medicines
           .where((item) => item.nameController.text.isNotEmpty)
-          .map((item) => OrderMedicine(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
-                name: item.nameController.text,
-                quantity: int.tryParse(item.quantityController.text) ?? 0,
-                unit: item.unitController.text.isNotEmpty
-                    ? item.unitController.text
-                    : null,
-                batchNumber: item.batchController.text.isNotEmpty
-                    ? item.batchController.text
-                    : null,
-              ))
+          .map(
+            (item) => OrderMedicine(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              name: item.nameController.text,
+              quantity: int.tryParse(item.quantityController.text) ?? 0,
+              unit: item.unitController.text.isNotEmpty
+                  ? item.unitController.text
+                  : null,
+              batchNumber: item.batchController.text.isNotEmpty
+                  ? item.batchController.text
+                  : null,
+            ),
+          )
           .toList();
 
       if (medicines.isEmpty) {
@@ -128,10 +130,7 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.error,
-      ),
+      SnackBar(content: Text(message), backgroundColor: AppColors.error),
     );
   }
 
@@ -144,9 +143,7 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-            ),
+            colorScheme: const ColorScheme.light(primary: AppColors.primary),
           ),
           child: child!,
         );
@@ -164,7 +161,7 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
   Widget build(BuildContext context) {
     final doctors = ref.watch(doctorProvider);
     final chemistShops = ref.watch(chemistShopProvider);
-    final distributors = ref.watch(distributorProvider);
+    final distributors = ref.watch(distributorListProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -283,7 +280,10 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
             const SizedBox(height: AppSpacing.lg),
 
             // Delivery Date
-            _buildSectionHeader('Expected Delivery Date (Optional)', Iconsax.calendar),
+            _buildSectionHeader(
+              'Expected Delivery Date (Optional)',
+              Iconsax.calendar,
+            ),
             const SizedBox(height: AppSpacing.sm),
             InkWell(
               onTap: _selectDeliveryDate,
@@ -333,11 +333,17 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
                 InkWell(
                   onTap: _addMedicine,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Iconsax.add_circle, size: 20, color: AppColors.primary),
+                        const Icon(
+                          Iconsax.add_circle,
+                          size: 20,
+                          color: AppColors.primary,
+                        ),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
                           'Add Medicine',
@@ -521,10 +527,10 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: AppTypography.body.copyWith(
-        color: AppColors.quaternary,
-      ),
-      prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: AppColors.primary) : null,
+      hintStyle: AppTypography.body.copyWith(color: AppColors.quaternary),
+      prefixIcon: prefixIcon != null
+          ? Icon(prefixIcon, color: AppColors.primary)
+          : null,
       filled: true,
       fillColor: AppColors.white,
       border: OutlineInputBorder(

@@ -34,14 +34,18 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
     // Apply search
     if (_searchQuery.isNotEmpty) {
       orders = orders
-          .where((order) =>
-              order.id.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .where(
+            (order) =>
+                order.id.toLowerCase().contains(_searchQuery.toLowerCase()),
+          )
           .toList();
     }
 
     // Apply filters
     if (_selectedDoctorId.isNotEmpty) {
-      orders = orders.where((order) => order.doctorId == _selectedDoctorId).toList();
+      orders = orders
+          .where((order) => order.doctorId == _selectedDoctorId)
+          .toList();
     }
 
     if (_selectedChemistShopId.isNotEmpty) {
@@ -57,7 +61,9 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
     }
 
     if (_selectedStatus != null) {
-      orders = orders.where((order) => order.status == _selectedStatus).toList();
+      orders = orders
+          .where((order) => order.status == _selectedStatus)
+          .toList();
     }
 
     return orders;
@@ -183,10 +189,10 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
       ),
       items: [
         const DropdownMenuItem(value: '', child: Text('All Doctors')),
-        ...doctors.map((doctor) => DropdownMenuItem(
-              value: doctor.id,
-              child: Text(doctor.name),
-            )),
+        ...doctors.map(
+          (doctor) =>
+              DropdownMenuItem(value: doctor.id, child: Text(doctor.name)),
+        ),
       ],
       onChanged: (value) {
         setState(() {
@@ -199,7 +205,9 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
   Widget _buildChemistShopDropdown() {
     final shops = ref.watch(chemistShopProvider);
     return DropdownButtonFormField<String>(
-      initialValue: _selectedChemistShopId.isEmpty ? null : _selectedChemistShopId,
+      initialValue: _selectedChemistShopId.isEmpty
+          ? null
+          : _selectedChemistShopId,
       decoration: InputDecoration(
         hintText: 'All Chemist Shops',
         border: OutlineInputBorder(
@@ -212,10 +220,9 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
       ),
       items: [
         const DropdownMenuItem(value: '', child: Text('All Chemist Shops')),
-        ...shops.map((shop) => DropdownMenuItem(
-              value: shop.id,
-              child: Text(shop.name),
-            )),
+        ...shops.map(
+          (shop) => DropdownMenuItem(value: shop.id, child: Text(shop.name)),
+        ),
       ],
       onChanged: (value) {
         setState(() {
@@ -226,9 +233,11 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
   }
 
   Widget _buildDistributorDropdown() {
-    final distributors = ref.watch(distributorProvider);
+    final distributors = ref.watch(distributorListProvider);
     return DropdownButtonFormField<String>(
-      initialValue: _selectedDistributorId.isEmpty ? null : _selectedDistributorId,
+      initialValue: _selectedDistributorId.isEmpty
+          ? null
+          : _selectedDistributorId,
       decoration: InputDecoration(
         hintText: 'All Distributors',
         border: OutlineInputBorder(
@@ -241,10 +250,12 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
       ),
       items: [
         const DropdownMenuItem(value: '', child: Text('All Distributors')),
-        ...distributors.map((distributor) => DropdownMenuItem(
-              value: distributor.id,
-              child: Text(distributor.name),
-            )),
+        ...distributors.map(
+          (distributor) => DropdownMenuItem(
+            value: distributor.id,
+            child: Text(distributor.name),
+          ),
+        ),
       ],
       onChanged: (value) {
         setState(() {
@@ -269,10 +280,10 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
       ),
       items: [
         const DropdownMenuItem(value: null, child: Text('All Statuses')),
-        ...OrderStatus.values.map((status) => DropdownMenuItem(
-              value: status,
-              child: Text(status.displayName),
-            )),
+        ...OrderStatus.values.map(
+          (status) =>
+              DropdownMenuItem(value: status, child: Text(status.displayName)),
+        ),
       ],
       onChanged: (value) {
         setState(() {
@@ -285,7 +296,8 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
   @override
   Widget build(BuildContext context) {
     final filteredOrders = _getFilteredOrders();
-    final hasActiveFilters = _selectedDoctorId.isNotEmpty ||
+    final hasActiveFilters =
+        _selectedDoctorId.isNotEmpty ||
         _selectedChemistShopId.isNotEmpty ||
         _selectedDistributorId.isNotEmpty ||
         _selectedStatus != null;
@@ -307,152 +319,158 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
           subtitleText: 'Track and manage your orders',
         ),
         body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          children: [
-            // Search and Filter Card
-            Stack(
-              children: [
-                OrderSearchFilterCard(
-                  onSearchChanged: (query) {
-                    setState(() {
-                      _searchQuery = query;
-                    });
-                  },
-                  onFilterTapped: _showFilterDialog,
-                ),
-                if (hasActiveFilters)
-                  Positioned(
-                    top: 8,
-                    right: 40,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.error,
-                        shape: BoxShape.circle,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            children: [
+              // Search and Filter Card
+              Stack(
+                children: [
+                  OrderSearchFilterCard(
+                    onSearchChanged: (query) {
+                      setState(() {
+                        _searchQuery = query;
+                      });
+                    },
+                    onFilterTapped: _showFilterDialog,
+                  ),
+                  if (hasActiveFilters)
+                    Positioned(
+                      top: 8,
+                      right: 40,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppColors.error,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
 
-            // Active Filters Chips
-            if (hasActiveFilters) ...[
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    if (_selectedDoctorId.isNotEmpty)
-                      _buildFilterChip(
-                        'Doctor',
-                        () => setState(() => _selectedDoctorId = ''),
-                      ),
-                    if (_selectedChemistShopId.isNotEmpty)
-                      _buildFilterChip(
-                        'Chemist Shop',
-                        () => setState(() => _selectedChemistShopId = ''),
-                      ),
-                    if (_selectedDistributorId.isNotEmpty)
-                      _buildFilterChip(
-                        'Distributor',
-                        () => setState(() => _selectedDistributorId = ''),
-                      ),
-                    if (_selectedStatus != null)
-                      _buildFilterChip(
-                        _selectedStatus!.displayName,
-                        () => setState(() => _selectedStatus = null),
-                      ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _selectedDoctorId = '';
-                          _selectedChemistShopId = '';
-                          _selectedDistributorId = '';
-                          _selectedStatus = null;
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.clear_all, size: 16, color: AppColors.error),
-                            const SizedBox(width: AppSpacing.xs),
-                            Text(
-                              'Clear All',
-                              style: AppTypography.bodySmall.copyWith(
+              // Active Filters Chips
+              if (hasActiveFilters) ...[
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      if (_selectedDoctorId.isNotEmpty)
+                        _buildFilterChip(
+                          'Doctor',
+                          () => setState(() => _selectedDoctorId = ''),
+                        ),
+                      if (_selectedChemistShopId.isNotEmpty)
+                        _buildFilterChip(
+                          'Chemist Shop',
+                          () => setState(() => _selectedChemistShopId = ''),
+                        ),
+                      if (_selectedDistributorId.isNotEmpty)
+                        _buildFilterChip(
+                          'Distributor',
+                          () => setState(() => _selectedDistributorId = ''),
+                        ),
+                      if (_selectedStatus != null)
+                        _buildFilterChip(
+                          _selectedStatus!.displayName,
+                          () => setState(() => _selectedStatus = null),
+                        ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _selectedDoctorId = '';
+                            _selectedChemistShopId = '';
+                            _selectedDistributorId = '';
+                            _selectedStatus = null;
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.clear_all,
+                                size: 16,
                                 color: AppColors.error,
+                              ),
+                              const SizedBox(width: AppSpacing.xs),
+                              Text(
+                                'Clear All',
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.error,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
+
+              // Orders List
+              Expanded(
+                child: filteredOrders.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Iconsax.box,
+                              size: 80,
+                              color: AppColors.quaternary.withAlpha(127),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              _searchQuery.isNotEmpty || hasActiveFilters
+                                  ? 'No orders found'
+                                  : 'No orders yet',
+                              style: AppTypography.tagline.copyWith(
+                                color: AppColors.quaternary,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              _searchQuery.isNotEmpty || hasActiveFilters
+                                  ? 'Try adjusting your search or filters'
+                                  : 'Create your first order',
+                              style: AppTypography.body.copyWith(
+                                color: AppColors.quaternary,
                               ),
                             ),
                           ],
                         ),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredOrders.length,
+                        itemBuilder: (context, index) {
+                          return OrderCard(order: filteredOrders[index]);
+                        },
                       ),
-                    ),
-                  ],
-                ),
               ),
-              const SizedBox(height: AppSpacing.md),
             ],
-
-            // Orders List
-            Expanded(
-              child: filteredOrders.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Iconsax.box,
-                            size: 80,
-                            color: AppColors.quaternary.withAlpha(127),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          Text(
-                            _searchQuery.isNotEmpty || hasActiveFilters
-                                ? 'No orders found'
-                                : 'No orders yet',
-                            style: AppTypography.tagline.copyWith(
-                              color: AppColors.quaternary,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            _searchQuery.isNotEmpty || hasActiveFilters
-                                ? 'Try adjusting your search or filters'
-                                : 'Create your first order',
-                            style: AppTypography.body.copyWith(
-                              color: AppColors.quaternary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: filteredOrders.length,
-                      itemBuilder: (context, index) {
-                        return OrderCard(order: filteredOrders[index]);
-                      },
-                    ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.push('${AppRouter.orders}/create');
-        },
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Iconsax.add, color: AppColors.white),
-        label: Text(
-          'New Order',
-          style: AppTypography.body.copyWith(
-            color: AppColors.white,
-            fontWeight: FontWeight.w600,
           ),
         ),
-      ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            context.push('${AppRouter.orders}/create');
+          },
+          backgroundColor: AppColors.primary,
+          icon: const Icon(Iconsax.add, color: AppColors.white),
+          label: Text(
+            'New Order',
+            style: AppTypography.body.copyWith(
+              color: AppColors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
         bottomNavigationBar: const MRBottomNavBar(currentIndex: 3),
       ),
     );
@@ -468,11 +486,7 @@ class _MyOrderScreenState extends ConsumerState<MyOrderScreen> {
           fontWeight: FontWeight.w600,
         ),
         backgroundColor: AppColors.primaryLight,
-        deleteIcon: const Icon(
-          Icons.close,
-          size: 16,
-          color: AppColors.primary,
-        ),
+        deleteIcon: const Icon(Icons.close, size: 16, color: AppColors.primary),
         onDeleted: onRemove,
       ),
     );

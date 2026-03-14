@@ -159,7 +159,7 @@ class AppRouter {
       GoRoute(
         path: distributor,
         name: 'distributor',
-        builder: (context, state) => const MyDistributorScreen(),
+        builder: (context, state) => const DistributorScreen(),
         routes: [
           GoRoute(
             path: ':id',
