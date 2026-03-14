@@ -9,8 +9,21 @@ import '../../provider/profile_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(profileProvider.notifier).fetchCurrentMrProfile();
+    });
+  }
 
   Future<void> _launchPhoneDialer(String phoneNumber) async {
     final Uri uri = Uri.parse('tel:$phoneNumber');
@@ -20,8 +33,9 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final profile = ref.watch(profileProvider);
+    final profileNotifier = ref.read(profileProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -33,8 +47,32 @@ class ProfileScreen extends ConsumerWidget {
         onBack: () => context.pop(),
       ),
       body: profile == null
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(color: AppColors.primary),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    profileNotifier.error ?? 'Loading profile...',
+                    style: AppTypography.body.copyWith(
+                      color: AppColors.quaternary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (profileNotifier.error != null) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    TextButton(
+                      onPressed: () {
+                        ref
+                            .read(profileProvider.notifier)
+                            .fetchCurrentMrProfile();
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ],
+              ),
             )
           : SingleChildScrollView(
               child: Column(
@@ -61,7 +99,7 @@ class ProfileScreen extends ConsumerWidget {
                   ),
 
                   const SizedBox(height: AppSpacing.xl),
-                  HomeFooter()
+                  HomeFooter(),
                 ],
               ),
             ),

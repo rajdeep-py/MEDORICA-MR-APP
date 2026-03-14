@@ -30,6 +30,7 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   String? _selectedImagePath;
   bool _controllersInitialized = false;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -39,19 +40,21 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
 
   void _initializeControllers() {
     if (_controllersInitialized) return;
-    
+
     final profile = ref.read(profileProvider);
     _nameController = TextEditingController(text: profile?.name ?? '');
     _phoneController = TextEditingController(text: profile?.phone ?? '');
     _emailController = TextEditingController(text: profile?.email ?? '');
-    _accountNoController =
-        TextEditingController(text: profile?.bankAccountNo ?? '');
+    _accountNoController = TextEditingController(
+      text: profile?.bankAccountNo ?? '',
+    );
     _bankNameController = TextEditingController(text: profile?.bankName ?? '');
-    _branchNameController =
-        TextEditingController(text: profile?.branchName ?? '');
+    _branchNameController = TextEditingController(
+      text: profile?.branchName ?? '',
+    );
     _ifscCodeController = TextEditingController(text: profile?.ifscCode ?? '');
     _passwordController = TextEditingController(text: profile?.password ?? '');
-    
+
     _controllersInitialized = true;
   }
 
@@ -63,11 +66,7 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
           File(_selectedImagePath!),
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            return const Icon(
-              Icons.person,
-              size: 60,
-              color: AppColors.primary,
-            );
+            return const Icon(Icons.person, size: 60, color: AppColors.primary);
           },
         ),
       );
@@ -77,7 +76,7 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     final profile = ref.watch(profileProvider);
     if (profile?.profileImage != null && profile!.profileImage!.isNotEmpty) {
       final imagePath = profile.profileImage!;
-      
+
       // Check if it's a file path (contains "/" and doesn't start with "assets")
       if (imagePath.contains('/') && !imagePath.startsWith('assets')) {
         // It's a file path from the device
@@ -116,11 +115,7 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     }
 
     // Default icon when no image is available
-    return const Icon(
-      Icons.person,
-      size: 60,
-      color: AppColors.primary,
-    );
+    return const Icon(Icons.person, size: 60, color: AppColors.primary);
   }
 
   @override
@@ -140,8 +135,9 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
 
   Future<void> _pickImageFromCamera() async {
     try {
-      final XFile? image =
-          await _imagePicker.pickImage(source: ImageSource.camera);
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+      );
       if (image != null) {
         setState(() {
           _selectedImagePath = image.path;
@@ -161,8 +157,9 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
 
   Future<void> _pickImageFromGallery() async {
     try {
-      final XFile? image =
-          await _imagePicker.pickImage(source: ImageSource.gallery);
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+      );
       if (image != null) {
         setState(() {
           _selectedImagePath = image.path;
@@ -213,48 +210,71 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     );
   }
 
-  void _updateProfile() {
+  Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
-      ref.read(profileProvider.notifier).updateAllDetails(
-            name: _nameController.text,
-            phone: _phoneController.text,
-            email: _emailController.text,
-            bankAccountNo: _accountNoController.text,
-            bankName: _bankNameController.text,
-            branchName: _branchNameController.text,
-            ifscCode: _ifscCodeController.text,
-            password: _passwordController.text.isNotEmpty
-                ? _passwordController.text
-                : null,
-          );
-
-      if (_selectedImagePath != null) {
-        ref
-            .read(profileProvider.notifier)
-            .updateProfileImage(_selectedImagePath!);
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile updated successfully'),
-          backgroundColor: AppColors.success,
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-      // Navigate back to profile screen
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (context.mounted) {
-          context.pop();
-        }
+      setState(() {
+        _isSubmitting = true;
       });
+
+      try {
+        await ref
+            .read(profileProvider.notifier)
+            .updateCurrentMrProfile(
+              name: _nameController.text.trim(),
+              phone: _phoneController.text.trim(),
+              email: _emailController.text.trim(),
+              bankAccountNo: _accountNoController.text.trim(),
+              bankName: _bankNameController.text.trim(),
+              branchName: _branchNameController.text.trim(),
+              ifscCode: _ifscCodeController.text.trim(),
+              password: _passwordController.text.trim().isNotEmpty
+                  ? _passwordController.text.trim()
+                  : null,
+              profilePhotoPath: _selectedImagePath,
+            );
+
+        if (!mounted) {
+          return;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile updated successfully'),
+            backgroundColor: AppColors.success,
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (context.mounted) {
+            context.pop();
+          }
+        });
+      } catch (e) {
+        if (!mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(profileProvider);
-    
+
     // Initialize controllers if not already done
     if (!_controllersInitialized && profile != null) {
       _initializeControllers();
@@ -274,10 +294,10 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
               child: CircularProgressIndicator(color: AppColors.primary),
             )
           : !_controllersInitialized
-              ? const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
-                )
-              : SingleChildScrollView(
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
+          : SingleChildScrollView(
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -585,7 +605,7 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                       child: Column(
                         children: [
                           ElevatedButton(
-                            onPressed: _updateProfile,
+                            onPressed: _isSubmitting ? null : _updateProfile,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.white,
@@ -598,20 +618,31 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                                 ),
                               ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Iconsax.tick_circle),
-                                const SizedBox(width: AppSpacing.sm),
-                                Text(
-                                  'Save Changes',
-                                  style: AppTypography.tagline.copyWith(
-                                    color: AppColors.white,
-                                    fontWeight: FontWeight.bold,
+                            child: _isSubmitting
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.white,
+                                      ),
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Iconsax.tick_circle),
+                                      const SizedBox(width: AppSpacing.sm),
+                                      Text(
+                                        'Save Changes',
+                                        style: AppTypography.tagline.copyWith(
+                                          color: AppColors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
                           ),
                           const SizedBox(height: AppSpacing.md),
                         ],
@@ -630,9 +661,7 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: AppTypography.body.copyWith(
-        color: AppColors.quaternary,
-      ),
+      hintStyle: AppTypography.body.copyWith(color: AppColors.quaternary),
       prefixIcon: Icon(prefixIcon, color: AppColors.primary),
       filled: true,
       fillColor: AppColors.white,

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../provider/auth_provider.dart';
+import '../../provider/profile_provider.dart';
 import '../../router/app_router.dart';
 import '../../theme/app_theme.dart';
 
@@ -38,6 +39,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final authState = ref.read(authNotifierProvider);
 
       if (authState.isAuthenticated && mounted) {
+        try {
+          await ref.read(profileProvider.notifier).fetchCurrentMrProfile();
+        } catch (_) {
+          // Profile screen can retry fetch if this call fails.
+        }
+
         // Navigate to home screen
         context.go(AppRouter.home);
       } else if (authState.error != null && mounted) {
@@ -89,7 +96,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           physics: const ClampingScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: size.height -
+              minHeight:
+                  size.height -
                   MediaQuery.of(context).padding.top -
                   MediaQuery.of(context).padding.bottom,
             ),
@@ -102,7 +110,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Top spacing
-                  SizedBox(height: keyboardVisible ? AppSpacing.xl : AppSpacing.mega),
+                  SizedBox(
+                    height: keyboardVisible ? AppSpacing.xl : AppSpacing.mega,
+                  ),
 
                   // Logo
                   Center(
@@ -135,9 +145,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Marketing Header
                   Text(
                     'Welcome Back MR!',
-                    style: AppTypography.h1.copyWith(
-                      color: AppColors.primary,
-                    ),
+                    style: AppTypography.h1.copyWith(color: AppColors.primary),
                     textAlign: TextAlign.center,
                   ),
 
@@ -348,7 +356,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         SizedBox(
                           height: 56.0,
                           child: ElevatedButton(
-                            onPressed: authState.isLoading ? null : _handleLogin,
+                            onPressed: authState.isLoading
+                                ? null
+                                : _handleLogin,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.white,
@@ -396,7 +406,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 const TextSpan(
                                   text: 'Having trouble signing in?  ',
                                 ),
-                               
+
                                 TextSpan(
                                   text: 'Call Support',
                                   style: AppTypography.body.copyWith(
@@ -405,7 +415,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     decoration: TextDecoration.underline,
                                   ),
                                   recognizer: TapGestureRecognizer()
-                                    ..onTap = () => _launchDialer('+916289398298'),
+                                    ..onTap = () =>
+                                        _launchDialer('+916289398298'),
                                 ),
                               ],
                             ),

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/mr.dart';
+import '../services/auth/auth_services.dart';
 
 class AuthState {
   final bool isLoading;
@@ -30,37 +31,35 @@ class AuthState {
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(AuthState());
+  AuthNotifier(this._authService) : super(AuthState());
+
+  final AuthService _authService;
 
   Future<void> login(String phone, String password) async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      final AuthLoginResponse response = await _authService.login(
+        phoneNo: phone,
+        password: password,
+      );
 
-      // Mock authentication - replace with actual API call
-      if (phone.isNotEmpty && password.isNotEmpty) {
-        final mr = MedicalRepresentative(
-          id: '1',
-          name: 'John Doe',
-          phone: phone,
-          email: 'john.doe@medorica.com',
-          designation: 'Medical Representative',
-          territory: 'North Delhi',
-        );
+      final MedicalRepresentative mr = MedicalRepresentative(
+        id: response.mrId,
+        mrId: response.mrId,
+        name: response.fullName,
+        phone: response.phoneNo,
+        email: '',
+        designation: 'Medical Representative',
+        territory: '',
+      );
 
-        state = state.copyWith(
-          isLoading: false,
-          isAuthenticated: true,
-          mr: mr,
-        );
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Invalid phone number or password',
-        );
-      }
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: true,
+        mr: mr,
+        error: null,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -75,5 +74,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  void setCurrentMr(MedicalRepresentative mr) {
+    state = state.copyWith(mr: mr, isAuthenticated: true);
   }
 }
