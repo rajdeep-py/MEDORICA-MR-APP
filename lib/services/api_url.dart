@@ -2,7 +2,7 @@ class ApiUrl {
   ApiUrl._();
 
   // Default base URL for physical devices on the same LAN as the backend.
-  static const String _defaultBaseUrl = 'http://192.168.1.44:8000';
+  static const String _defaultBaseUrl = 'http://10.208.117.120:8000';
 
   // Override at runtime if needed:
   // flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
@@ -48,6 +48,17 @@ class ApiUrl {
       '/monthly-plan/get-by-mr/$mrId';
   static String monthlyPlanGetByMrAndDate(String mrId, String planDate) =>
       '/monthly-plan/get-by-mr/$mrId/date/$planDate';
+
+  // Attendance Endpoints
+  static const String _attendanceMrBase = '/attendance/mr';
+  static const String attendanceMrPost = '$_attendanceMrBase/post';
+  static const String attendanceMrGetAll = '$_attendanceMrBase/get-all';
+  static String attendanceMrGetByMrId(String mrId) =>
+      '$_attendanceMrBase/get-by/$mrId';
+  static String attendanceMrGetByMrIdAndAttendanceId(String mrId, int id) =>
+      '$_attendanceMrBase/get-by/$mrId/$id';
+  static String attendanceMrUpdateByMrIdAndAttendanceId(String mrId, int id) =>
+      '$_attendanceMrBase/update-by/$mrId/$id';
 
   static String getFullUrl(String path) {
     final String trimmed = path.trim();
