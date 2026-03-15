@@ -1,542 +1,407 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:intl/intl.dart';
-import '../../models/distributor.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/order.dart';
-import '../../provider/order_provider.dart';
-import '../../provider/doctor_provider.dart';
-import '../../provider/chemist_shop_provider.dart';
-import '../../provider/distributor_provider.dart';
+import '../../router/app_router.dart';
 import '../../theme/app_theme.dart';
 
-class OrderDetailsBottomSheet extends ConsumerWidget {
-  final String orderId;
+class OrderDetailsBottomSheet extends ConsumerStatefulWidget {
+  final Order order;
 
-  const OrderDetailsBottomSheet({super.key, required this.orderId});
+  const OrderDetailsBottomSheet({super.key, required this.order});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final order = ref.watch(orderDetailProvider(orderId));
+  ConsumerState<OrderDetailsBottomSheet> createState() =>
+      _OrderDetailsBottomSheetState();
+}
 
-    if (order == null) {
-      return Container(
-        height: 300,
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: const Center(child: Text('Order not found')),
+class _OrderDetailsBottomSheetState
+    extends ConsumerState<OrderDetailsBottomSheet> {
+  Future<void> _launchDialer(String phoneNo) async {
+    final phoneUrl = 'tel:${phoneNo.replaceAll(RegExp(r'[^\d+]'), '')}';
+    if (await canLaunchUrl(Uri.parse(phoneUrl))) {
+      await launchUrl(
+        Uri.parse(phoneUrl),
+        mode: LaunchMode.externalApplication,
       );
     }
+  }
 
-    final doctor = ref.watch(doctorDetailProvider(order.doctorId));
-    final chemistShop = ref.watch(
-      chemistShopDetailProvider(order.chemistShopId),
-    );
-    final distributorAsync = ref.watch(
-      distributorByIdProvider(order.distributorId),
-    );
-    final distributor = distributorAsync is AsyncData<Distributor?>
-        ? distributorAsync.value
-        : null;
+  Future<void> _launchMaps(String address) async {
+    final mapsUrl =
+        'https://www.google.com/maps/search/${Uri.encodeComponent(address)}';
+    if (await canLaunchUrl(Uri.parse(mapsUrl))) {
+      await launchUrl(Uri.parse(mapsUrl), mode: LaunchMode.externalApplication);
+    }
+  }
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          // Handle bar
-          Container(
-            margin: const EdgeInsets.only(top: AppSpacing.md),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.border,
-              borderRadius: BorderRadius.circular(2),
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.9,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) {
+        return SingleChildScrollView(
+          controller: scrollController,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
             ),
-          ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Order Details',
-                      style: AppTypography.h3.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      order.id,
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.quaternary,
-                      ),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: AppColors.quaternary),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
-
-          const Divider(height: 1),
-
-          // Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Status Section with Change Button
-                  _buildSectionHeader('Order Status'),
-                  const SizedBox(height: AppSpacing.sm),
+                  // Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildStatusBadge(order.status),
-                      InkWell(
-                        onTap: () =>
-                            _showStatusChangeDialog(context, ref, order),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
+                      Text(
+                        'Order Details',
+                        style: AppTypography.h2.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Iconsax.edit,
-                                size: 16,
-                                color: AppColors.primary,
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Text(
-                                'Change Status',
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
+                          child: const Icon(
+                            Iconsax.close_circle,
+                            color: AppColors.primary,
+                            size: 20,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: 20),
 
-                  // Order Dates
-                  _buildSectionHeader('Order Information'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildInfoCard([
-                    _buildInfoRow(
-                      icon: Iconsax.calendar,
-                      label: 'Order Date',
-                      value: DateFormat(
-                        'dd MMM yyyy, hh:mm a',
-                      ).format(order.orderDate),
-                    ),
-                    if (order.deliveryDate != null)
-                      _buildInfoRow(
-                        icon: Iconsax.truck_fast,
-                        label: 'Delivery Date',
-                        value: DateFormat(
-                          'dd MMM yyyy',
-                        ).format(order.deliveryDate!),
+                  // Order ID
+                  _buildSection(
+                    title: 'Order ID',
+                    child: Text(
+                      widget.order.id,
+                      style: AppTypography.h3.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
                       ),
-                  ]),
-                  const SizedBox(height: AppSpacing.lg),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-                  // Doctor Details
-                  _buildSectionHeader('Doctor'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildInfoCard([
-                    _buildInfoRow(
-                      icon: Iconsax.user,
-                      label: 'Name',
-                      value: doctor?.name ?? 'Unknown',
-                    ),
-                    _buildInfoRow(
-                      icon: Iconsax.briefcase,
-                      label: 'Specialization',
-                      value: doctor?.specialization ?? 'N/A',
-                    ),
-                    _buildInfoRow(
+                  // Chemist Shop Information
+                  _buildSectionTitle('Chemist Shop'),
+                  const SizedBox(height: 10),
+                  _buildContactItem(
+                    icon: Iconsax.shop,
+                    label: 'Shop Name',
+                    value: widget.order.chemistShopName,
+                    isClickable: false,
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => _launchDialer(widget.order.chemistShopPhoneNo),
+                    child: _buildContactItem(
                       icon: Iconsax.call,
-                      label: 'Phone',
-                      value: doctor?.phoneNumber ?? 'N/A',
+                      label: 'Shop Phone',
+                      value: widget.order.chemistShopPhoneNo,
+                      isClickable: true,
                     ),
-                  ]),
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Chemist Shop Details
-                  _buildSectionHeader('Delivery Location'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildInfoCard([
-                    _buildInfoRow(
-                      icon: Iconsax.shop,
-                      label: 'Shop Name',
-                      value: chemistShop?.name ?? 'Unknown',
-                    ),
-                    _buildInfoRow(
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => _launchMaps(widget.order.chemistShopAddress),
+                    child: _buildContactItem(
                       icon: Iconsax.location,
-                      label: 'Address',
-                      value: chemistShop?.location ?? 'N/A',
+                      label: 'Shop Address',
+                      value: widget.order.chemistShopAddress,
+                      isClickable: true,
                     ),
-                    _buildInfoRow(
-                      icon: Iconsax.call,
-                      label: 'Phone',
-                      value: chemistShop?.phoneNumber ?? 'N/A',
-                    ),
-                  ]),
-                  const SizedBox(height: AppSpacing.lg),
+                  ),
+                  const SizedBox(height: 16),
 
-                  // Distributor Details
-                  _buildSectionHeader('Distributor'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildInfoCard([
-                    _buildInfoRow(
-                      icon: Iconsax.truck,
-                      label: 'Company',
-                      value: distributor?.name ?? 'Unknown',
-                    ),
-                    _buildInfoRow(
+                  // Doctor Information
+                  _buildSectionTitle('Doctor'),
+                  const SizedBox(height: 10),
+                  _buildContactItem(
+                    icon: Iconsax.user,
+                    label: 'Doctor Name',
+                    value: widget.order.doctorName,
+                    isClickable: false,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Distributor Information
+                  _buildSectionTitle('Distributor'),
+                  const SizedBox(height: 10),
+                  _buildContactItem(
+                    icon: Iconsax.truck,
+                    label: 'Distributor Name',
+                    value: widget.order.distributorName,
+                    isClickable: false,
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => _launchDialer(widget.order.distributorPhoneNo),
+                    child: _buildContactItem(
                       icon: Iconsax.call,
-                      label: 'Phone',
-                      value: distributor?.phoneNo ?? 'N/A',
+                      label: 'Distributor Phone',
+                      value: widget.order.distributorPhoneNo,
+                      isClickable: true,
                     ),
-                    if (distributor != null)
-                      _buildInfoRow(
-                        icon: Iconsax.timer_1,
-                        label: 'Delivery Time',
-                        value: distributor.deliveryTime ?? 'N/A',
-                      ),
-                  ]),
-                  const SizedBox(height: AppSpacing.lg),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => _launchMaps(widget.order.distributorAddress),
+                    child: _buildContactItem(
+                      icon: Iconsax.location,
+                      label: 'Distributor Address',
+                      value: widget.order.distributorAddress,
+                      isClickable: true,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildContactItem(
+                    icon: Iconsax.clock,
+                    label: 'Delivery Time',
+                    value: widget.order.distributorDeliveryTime,
+                    isClickable: false,
+                  ),
+                  const SizedBox(height: 16),
 
                   // Medicines
-                  _buildSectionHeader(
-                    'Medicines (${order.medicines.length} items)',
+                  _buildSectionTitle('Medicines'),
+                  const SizedBox(height: 10),
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: widget.order.medicines.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final medicine = widget.order.medicines[index];
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight.withAlpha(100),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppColors.primaryLight.withAlpha(150),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              medicine.name,
+                              style: AppTypography.body.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Qty: ${medicine.quantity}',
+                                  style: AppTypography.caption.copyWith(
+                                    color: AppColors.quaternary,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                Text(
+                                  'Pack: ${medicine.pack}',
+                                  style: AppTypography.caption.copyWith(
+                                    color: AppColors.quaternary,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  ...order.medicines.map(
-                    (medicine) => _buildMedicineCard(medicine),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: 24),
 
-                  // Notes
-                  if (order.notes != null && order.notes!.isNotEmpty) ...[
-                    _buildSectionHeader('Notes'),
-                    const SizedBox(height: AppSpacing.sm),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                        border: Border.all(color: AppColors.border),
+                  // Order Status
+                  _buildSectionTitle('Order Status'),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight.withAlpha(100),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppColors.primaryLight.withAlpha(150),
+                        width: 1,
                       ),
-                      child: Text(
-                        order.notes!,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Iconsax.status, color: AppColors.primary),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            widget.order.status
+                                .toString()
+                                .split('.')
+                                .last
+                                .toUpperCase(),
+                            style: AppTypography.body.copyWith(
+                              color: AppColors.primary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.push(
+                          '${AppRouter.orders}/edit/${widget.order.id}',
+                          extra: widget.order,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        elevation: 2,
+                        minimumSize: const Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      icon: const Icon(Iconsax.edit_2, color: AppColors.white),
+                      label: Text(
+                        'Edit Order',
                         style: AppTypography.body.copyWith(
-                          color: AppColors.black,
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: AppTypography.tagline.copyWith(
+      style: AppTypography.h3.copyWith(
         color: AppColors.primary,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.3,
       ),
     );
   }
 
-  Widget _buildInfoCard(List<Widget> children) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.md),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        children: children
-            .map(
-              (child) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                child: child,
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Row(
+  Widget _buildSection({required String title, required Widget child}) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: AppColors.primary),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.quaternary,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: AppTypography.body.copyWith(
-                  color: AppColors.black,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+        Text(
+          title,
+          style: AppTypography.caption.copyWith(
+            color: AppColors.quaternary,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
           ),
         ),
+        const SizedBox(height: 6),
+        child,
       ],
     );
   }
 
-  Widget _buildMedicineCard(OrderMedicine medicine) {
+  Widget _buildContactItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required bool isClickable,
+  }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.md),
-        border: Border.all(color: AppColors.border),
+        color: AppColors.primaryLight.withAlpha(100),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColors.primaryLight.withAlpha(150),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(AppBorderRadius.sm),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Iconsax.health,
-              color: AppColors.primary,
-              size: 24,
-            ),
+            child: Icon(icon, color: AppColors.primary, size: 18),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  medicine.name,
-                  style: AppTypography.body.copyWith(
-                    color: AppColors.black,
+                  label,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.quaternary,
+                    fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      'Qty: ${medicine.quantity}',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.quaternary,
-                      ),
-                    ),
-                    if (medicine.unit != null) ...[
-                      Text(
-                        ' ${medicine.unit}',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.quaternary,
-                        ),
-                      ),
-                    ],
-                    if (medicine.batchNumber != null) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        '• Batch: ${medicine.batchNumber}',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.quaternary,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ],
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(OrderStatus status) {
-    Color backgroundColor;
-    Color textColor;
-
-    switch (status) {
-      case OrderStatus.pending:
-        backgroundColor = AppColors.secondary.withAlpha(25);
-        textColor = AppColors.secondary;
-        break;
-      case OrderStatus.confirmed:
-        backgroundColor = AppColors.tertiary.withAlpha(25);
-        textColor = AppColors.tertiary;
-        break;
-      case OrderStatus.processing:
-        backgroundColor = AppColors.secondary.withAlpha(25);
-        textColor = AppColors.secondary;
-        break;
-      case OrderStatus.shipped:
-        backgroundColor = AppColors.primary.withAlpha(25);
-        textColor = AppColors.primary;
-        break;
-      case OrderStatus.delivered:
-        backgroundColor = AppColors.success.withAlpha(25);
-        textColor = AppColors.success;
-        break;
-      case OrderStatus.cancelled:
-        backgroundColor = AppColors.error.withAlpha(25);
-        textColor = AppColors.error;
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(AppBorderRadius.sm),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(_getStatusIcon(status), size: 16, color: textColor),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            status.displayName,
-            style: AppTypography.body.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  IconData _getStatusIcon(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.pending:
-        return Iconsax.clock;
-      case OrderStatus.confirmed:
-        return Iconsax.tick_circle;
-      case OrderStatus.processing:
-        return Iconsax.refresh;
-      case OrderStatus.shipped:
-        return Iconsax.truck;
-      case OrderStatus.delivered:
-        return Iconsax.verify;
-      case OrderStatus.cancelled:
-        return Iconsax.close_circle;
-    }
-  }
-
-  void _showStatusChangeDialog(
-    BuildContext context,
-    WidgetRef ref,
-    Order order,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Change Order Status',
-          style: AppTypography.tagline.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: OrderStatus.values.map((status) {
-            final isSelected = status == order.status;
-            return ListTile(
-              leading: Icon(
-                _getStatusIcon(status),
-                color: isSelected ? AppColors.primary : AppColors.quaternary,
-              ),
-              title: Text(
-                status.displayName,
-                style: AppTypography.body.copyWith(
-                  color: isSelected ? AppColors.primary : AppColors.black,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-              ),
-              trailing: isSelected
-                  ? const Icon(Iconsax.tick_circle, color: AppColors.primary)
-                  : null,
-              onTap: () {
-                ref
-                    .read(orderProvider.notifier)
-                    .updateOrderStatus(order.id, status);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Order status updated to ${status.displayName}',
-                    ),
-                    backgroundColor: AppColors.success,
-                  ),
-                );
-              },
-            );
-          }).toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          if (isClickable)
+            Icon(Iconsax.arrow_right, color: AppColors.quaternary, size: 18),
         ],
       ),
     );

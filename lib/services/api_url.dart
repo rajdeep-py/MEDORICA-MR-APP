@@ -106,7 +106,31 @@ class ApiUrl {
     String mrId,
     String shopId,
   ) => '$_chemistShopMrBase/delete-by/$mrId/$shopId';
+  
+  // MR Monthly Target Endpoints (GET)
+  static const String monthlyTargetmrGetAll = '/monthly-target/mr/get-all';
+  static String monthlyTargetmrGetByMrId(String mrId) =>
+      '/monthly-target/mr/get-by-mr/$mrId';
+  static String monthlyTargetmrGetByMrYearMonth(
+    String mrId,
+    int year,
+    int month,
+  ) => '/monthly-target/mr/get-by/$mrId/$year/$month';
 
+  // MR Order Endpoints
+  static String orderMrPostByMrId(String mrId) =>
+      '/order/mr/post-by/$mrId';
+  static const String orderMrGetAll = '/order/mr/get-all';
+  static String orderMrGetByMrId(String mrId) =>
+      '/order/mr/get-by-mr/$mrId';
+  static String orderMrGetByMrAndOrderId(String mrId, String orderId) =>
+      '/order/mr/get-by/$mrId/$orderId';
+  static String orderMrUpdateByOrderId(String orderId) =>
+      '/order/mr/update-by/$orderId';
+  static String orderMrDeleteByOrderId(String orderId) =>
+      '/order/mr/delete-by/$orderId';
+
+   // Helper to construct full URL for a given path   
   static String getFullUrl(String path) {
     final String trimmed = path.trim();
     if (trimmed.isEmpty) {

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import '../../models/order.dart';
 import '../../theme/app_theme.dart';
 
 class OrderSearchFilterCard extends StatefulWidget {
   final Function(String) onSearchChanged;
-  final VoidCallback? onFilterTapped;
+  final Function(OrderStatus?) onStatusFilterChanged;
 
   const OrderSearchFilterCard({
     super.key,
     required this.onSearchChanged,
-    this.onFilterTapped,
+    required this.onStatusFilterChanged,
   });
 
   @override
@@ -17,7 +18,14 @@ class OrderSearchFilterCard extends StatefulWidget {
 }
 
 class _OrderSearchFilterCardState extends State<OrderSearchFilterCard> {
-  final TextEditingController _searchController = TextEditingController();
+  late TextEditingController _searchController;
+  OrderStatus? _selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
 
   @override
   void dispose() {
@@ -28,16 +36,18 @@ class _OrderSearchFilterCardState extends State<OrderSearchFilterCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppBorderRadius.lg),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadowColor,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: AppColors.primary.withAlpha(12),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
+        border: Border.all(color: AppColors.primaryLight, width: 1),
       ),
       child: Row(
         children: [
@@ -46,53 +56,70 @@ class _OrderSearchFilterCardState extends State<OrderSearchFilterCard> {
               controller: _searchController,
               onChanged: widget.onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Search by Order ID...',
+                hintText: 'Search orders...',
                 hintStyle: AppTypography.body.copyWith(
                   color: AppColors.quaternary,
+                  fontSize: 12,
                 ),
+                border: InputBorder.none,
                 prefixIcon: const Icon(
                   Iconsax.search_normal,
-                  size: 20,
                   color: AppColors.quaternary,
+                  size: 18,
                 ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(
-                          Icons.clear,
-                          size: 20,
-                          color: AppColors.quaternary,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _searchController.clear();
-                            widget.onSearchChanged('');
-                          });
-                        },
-                      )
-                    : null,
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.md,
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 34,
+                  minHeight: 34,
                 ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 6),
+              ),
+              style: AppTypography.body.copyWith(
+                color: AppColors.primary,
+                fontSize: 13,
               ),
             ),
           ),
-          if (widget.onFilterTapped != null) ...[
-            Container(
-              height: 40,
-              width: 1,
-              color: AppColors.border,
-            ),
-            IconButton(
-              icon: const Icon(
-                Iconsax.filter,
-                size: 20,
-                color: AppColors.quaternary,
+          Container(
+            width: 1,
+            height: 20,
+            color: AppColors.primaryLight,
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+          ),
+          PopupMenuButton<OrderStatus?>(
+            onSelected: (value) {
+              setState(() => _selectedStatus = value);
+              widget.onStatusFilterChanged(value);
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(value: null, child: Text('All Orders')),
+              const PopupMenuItem(
+                value: OrderStatus.pending,
+                child: Text('Pending'),
               ),
-              onPressed: widget.onFilterTapped,
+              const PopupMenuItem(
+                value: OrderStatus.approved,
+                child: Text('Approved'),
+              ),
+              const PopupMenuItem(
+                value: OrderStatus.delivered,
+                child: Text('Delivered'),
+              ),
+              const PopupMenuItem(
+                value: OrderStatus.shipped,
+                child: Text('Shipped'),
+              ),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Icon(
+                Iconsax.setting_3,
+                color: _selectedStatus != null
+                    ? AppColors.primary
+                    : AppColors.quaternary,
+                size: 20,
+              ),
             ),
-          ],
+          ),
         ],
       ),
     );

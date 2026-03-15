@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import '../models/order.dart';
 import '../screens/auth/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/home/home_screen.dart';
@@ -12,6 +13,7 @@ import '../screens/chemist_shop/chemist_shop_detail_screen.dart';
 import '../screens/chemist_shop/add_edit_chemist_shop_screen.dart';
 import '../screens/distributor/my_distributor_screen.dart';
 import '../screens/distributor/distributor_detail_screen.dart';
+import '../screens/order/edit_order_screen.dart';
 import '../screens/order/my_order_screen.dart';
 import '../screens/order/create_order_screen.dart';
 import '../screens/gift/gift_screen.dart';
@@ -118,12 +120,21 @@ class AppRouter {
       GoRoute(
         path: orders,
         name: 'orders',
-        builder: (context, state) => const MyOrderScreen(),
+        builder: (context, state) => const OrderScreen(),
         routes: [
           GoRoute(
             path: 'create',
             name: 'orderCreate',
-            builder: (context, state) => const CreateOrderScreen(),
+            builder: (context, state) => const CreateNewOrderScreen(),
+          ),
+          GoRoute(
+            path: 'edit/:id',
+            name: 'orderEdit',
+            builder: (context, state) {
+              final _ = state.pathParameters['id']!;
+              final order = state.extra as Order?;
+              return EditOrderScreen(order: order!);
+            },
           ),
         ],
       ),
