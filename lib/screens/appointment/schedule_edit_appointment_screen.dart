@@ -323,7 +323,7 @@ class _ScheduleEditAppointmentScreenState
           );
         }
 
-        context.go('/asm/appointments');
+        context.go('/mr/appointments');
       } catch (error) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(

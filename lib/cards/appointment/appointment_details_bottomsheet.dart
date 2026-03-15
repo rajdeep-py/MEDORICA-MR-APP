@@ -242,7 +242,7 @@ class AppointmentDetailsBottomSheet extends ConsumerWidget {
                       onPressed: () {
                         Navigator.of(context).pop();
                         context.push(
-                          '/asm/appointments/edit/${appointment.id}',
+                          '/mr/appointments/edit/${appointment.id}',
                           extra: appointment,
                         );
                       },

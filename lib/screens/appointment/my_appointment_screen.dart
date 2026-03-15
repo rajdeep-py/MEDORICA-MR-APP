@@ -86,7 +86,7 @@ class _MyAppointmentScreenState extends ConsumerState<MyAppointmentScreen> {
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => context.push('/asm/appointments/schedule'),
+          onPressed: () => context.push('/mr/appointments/schedule'),
           backgroundColor: AppColors.primary,
           icon: const Icon(Iconsax.add, color: AppColors.white),
           label: Text(
@@ -168,7 +168,7 @@ class _MyAppointmentScreenState extends ConsumerState<MyAppointmentScreen> {
             const SizedBox(height: AppSpacing.xl),
             if (!hasActiveFilters)
               ElevatedButton.icon(
-                onPressed: () => context.push('/asm/appointments/schedule'),
+                onPressed: () => context.push('/mr/appointments/schedule'),
                 style: AppButtonStyles.primaryButton(height: 44),
                 icon: const Icon(Iconsax.add, color: AppColors.white),
                 label: Text(
