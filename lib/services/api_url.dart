@@ -2,7 +2,7 @@ class ApiUrl {
   ApiUrl._();
 
   // Default base URL for physical devices on the same LAN as the backend.
-  static const String _defaultBaseUrl = 'http://10.208.117.120:8000';
+  static const String _defaultBaseUrl = 'http://192.168.1.44:8000';
 
   // Override at runtime if needed:
   // flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
@@ -29,6 +29,10 @@ class ApiUrl {
   static const String _mrBase = '/onboarding/mr';
   // Login Endpoint
   static const String mrLogin = '$_mrBase/login';
+    // Salary Slip Endpoints
+    static const String salarySlipMrDownloadByMrId = '/salary-slip/mr/download-by-mr';
+
+    static String salarySlipDownloadByMrId(String mrId) => '$salarySlipMrDownloadByMrId/$mrId';
   // Get Profile by ID Endpoint
   static String mrGetById(String mrId) => '$_mrBase/get-by/$mrId';
   // Update Profile by ID Endpoint

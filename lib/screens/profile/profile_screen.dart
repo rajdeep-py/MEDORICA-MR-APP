@@ -96,6 +96,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     onNotifications: () {
                       context.push('/notifications');
                     },
+                    onSalarySlip: () async {
+                      await ref.read(profileProvider.notifier).downloadSalarySlipForCurrentMr();
+                    },
                   ),
 
                   const SizedBox(height: AppSpacing.xl),

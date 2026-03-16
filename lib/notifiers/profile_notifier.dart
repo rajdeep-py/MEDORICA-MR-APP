@@ -3,14 +3,33 @@ import 'package:flutter_riverpod/misc.dart';
 import '../models/mr.dart';
 import '../provider/auth_provider.dart';
 import '../services/profile/profile_services.dart';
+import '../services/salary_slip/salary_slip_services.dart';
 
 typedef Reader = T Function<T>(ProviderListenable<T> provider);
 
 class ProfileNotifier extends StateNotifier<MedicalRepresentative?> {
-  ProfileNotifier(this._profileService, this._read) : super(null);
+  ProfileNotifier(this._profileService, this._read, this._salarySlipService) : super(null);
 
   final ProfileService _profileService;
   final Reader _read;
+  final SalarySlipServices _salarySlipService;
+  Future<void> downloadSalarySlipForCurrentMr() async {
+    final String? mrId = _read(authNotifierProvider).mr?.mrId;
+    if (mrId == null || mrId.isEmpty) {
+      _error = 'No logged in MR found';
+      return;
+    }
+    _isLoading = true;
+    _error = null;
+    try {
+      await _salarySlipService.downloadSalarySlipByMrId(mrId);
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+    }
+  }
 
   bool _isLoading = false;
   String? _error;

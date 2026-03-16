@@ -7,6 +7,7 @@ class ProfileOptionsCard extends StatelessWidget {
   final VoidCallback onAboutUs;
   final VoidCallback onContactSupport;
   final VoidCallback onNotifications;
+  final VoidCallback onSalarySlip;
 
   const ProfileOptionsCard({
     super.key,
@@ -14,6 +15,7 @@ class ProfileOptionsCard extends StatelessWidget {
     required this.onAboutUs,
     required this.onContactSupport,
     required this.onNotifications,
+    required this.onSalarySlip,
   });
 
   @override
@@ -47,6 +49,13 @@ class ProfileOptionsCard extends StatelessWidget {
             title: 'Contact Support',
             subtitle: 'Get help and support',
             onTap: onContactSupport,
+          ),
+          _buildDivider(),
+          _buildOption(
+            icon: Iconsax.document,
+            title: 'Salary Slip',
+            subtitle: 'Download your salary slip',
+            onTap: onSalarySlip,
           ),
           _buildDivider(),
           _buildOption(
