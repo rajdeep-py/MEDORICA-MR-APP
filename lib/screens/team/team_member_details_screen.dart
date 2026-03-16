@@ -37,107 +37,155 @@ class TeamMemberDetailsScreen extends StatelessWidget {
               horizontal: AppSpacing.screenPaddingHorizontal,
               vertical: AppSpacing.md,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
-                    radius: 36,
-                    backgroundColor: AppColors.primaryLight,
-                    child: photoUrl == null ? Icon(Iconsax.user, color: AppColors.primary, size: 32) : null,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppBorderRadius.lg),
+                    topRight: Radius.circular(AppBorderRadius.lg),
                   ),
-                  const SizedBox(width: AppSpacing.lg),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(m.fullName, style: AppTypography.h3.copyWith(color: AppColors.primary)),
-                        const SizedBox(height: AppSpacing.sm),
-                        Row(
+                  child: photoUrl != null
+                      ? Image.network(
+                          photoUrl,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          height: 180,
+                          color: AppColors.primaryLight,
+                          child: Center(
+                            child: Icon(Iconsax.user, color: AppColors.primary, size: 64),
+                          ),
+                        ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        m.fullName,
+                        style: AppTypography.h2.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                        ),
+                        child: Column(
                           children: [
-                            Icon(Iconsax.call, size: 18, color: AppColors.primary),
-                            const SizedBox(width: 6),
-                            Text(m.phoneNo, style: AppTypography.bodySmall),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Iconsax.call, size: 18, color: AppColors.primary),
+                                const SizedBox(width: 8),
+                                Text(m.phoneNo, style: AppTypography.bodySmall),
+                              ],
+                            ),
+                            if (m.altPhoneNo != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Iconsax.call_add, size: 18, color: AppColors.primary),
+                                    const SizedBox(width: 8),
+                                    Text(m.altPhoneNo!, style: AppTypography.bodySmall),
+                                  ],
+                                ),
+                              ),
+                            if (m.email != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Iconsax.sms, size: 18, color: AppColors.primary),
+                                    const SizedBox(width: 8),
+                                    Text(m.email!, style: AppTypography.bodySmall),
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
-                        if (m.altPhoneNo != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Row(
-                              children: [
-                                Icon(Iconsax.call_add, size: 18, color: AppColors.primary),
-                                const SizedBox(width: 6),
-                                Text(m.altPhoneNo!, style: AppTypography.bodySmall),
-                              ],
-                            ),
-                          ),
-                        if (m.email != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Row(
-                              children: [
-                                Icon(Iconsax.sms, size: 18, color: AppColors.primary),
-                                const SizedBox(width: 6),
-                                Text(m.email!, style: AppTypography.bodySmall),
-                              ],
-                            ),
-                          ),
-                        if (m.headquarterAssigned != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Row(
-                              children: [
-                                Icon(Iconsax.location, size: 18, color: AppColors.primary),
-                                const SizedBox(width: 6),
-                                Text(m.headquarterAssigned!, style: AppTypography.bodySmall),
-                              ],
-                            ),
-                          ),
-                        if (m.territoriesOfWork != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Iconsax.map, size: 18, color: AppColors.primary),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    m.territoriesOfWork!.join(", "),
-                                    style: AppTypography.bodySmall,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Divider(color: AppColors.primary.withOpacity(0.15)),
+                      const SizedBox(height: AppSpacing.md),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(AppBorderRadius.md),
+                        ),
+                        child: Column(
+                          children: [
+                            if (m.headquarterAssigned != null)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Iconsax.location, size: 18, color: AppColors.primary),
+                                  const SizedBox(width: 8),
+                                  Text(m.headquarterAssigned!, style: AppTypography.bodySmall),
+                                ],
+                              ),
+                            if (m.territoriesOfWork != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(Iconsax.map, size: 18, color: AppColors.primary),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        m.territoriesOfWork!.join(", "),
+                                        style: AppTypography.bodySmall,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        if (m.address != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Iconsax.home, size: 18, color: AppColors.primary),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    m.address!,
-                                    style: AppTypography.bodySmall,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                              ),
+                            if (m.address != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(Iconsax.home, size: 18, color: AppColors.primary),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        m.address!,
+                                        style: AppTypography.bodySmall,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
