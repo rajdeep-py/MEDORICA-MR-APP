@@ -70,6 +70,9 @@ dependencies:
   # For opening files
   open_filex: ^4.7.0
 
+  # For calendar view
+  table_calendar: ^3.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

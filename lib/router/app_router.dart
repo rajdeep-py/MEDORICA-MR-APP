@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import '../models/order.dart';
+import '../screens/attendance/attendance_screen.dart';
 import '../screens/auth/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/home/home_screen.dart';
@@ -40,8 +41,9 @@ class AppRouter {
   static const String profile = '/profile';
   static const String aboutUs = '/about-us';
   static const String notifications = '/notifications';
-  static const String monthPlan = '/month-plan';
-  static const String visualAds = '/visual-ads';
+    static const String monthPlan = '/month-plan';
+    static const String visualAds = '/visual-ads';
+    static const String attendance = '/attendance';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -241,6 +243,11 @@ class AppRouter {
           return VisualAdsScreen(onlyAdIds: onlyAdIds);
         },
       ),
+        GoRoute(
+          path: attendance,
+          name: 'attendance',
+          builder: (context, state) => const AttendanceScreen(),
+        ),
     ],
   );
 }

@@ -62,8 +62,8 @@ class MRQuickActionsCard extends StatelessWidget {
       case 'Chemists':
         context.push('/mr/chemist');
         break;
-      case 'Profile':
-        context.push('/profile');
+      case 'Attendance':
+        context.push('/attendance');
         break;
       default:
         ScaffoldMessenger.of(context)
@@ -81,7 +81,7 @@ class MRQuickActionsCard extends StatelessWidget {
       [Iconsax.truck, 'Distributors'],
       [Iconsax.wallet, 'Salary Slip'],
       [Iconsax.shop, 'Chemists'],
-      [Iconsax.user, 'Profile'],
+      [Iconsax.calendar, 'Attendance'],
     ];
 
     return Container(
