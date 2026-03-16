@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/team.dart';
+import '../../services/api_url.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/app_bar.dart';
 
@@ -22,6 +23,9 @@ class TeamMemberDetailsScreen extends StatelessWidget {
         itemCount: members.length,
         itemBuilder: (context, index) {
           final m = members[index];
+          final String? photoUrl = m.profilePhoto != null
+              ? ApiUrl.getFullUrl(m.profilePhoto!)
+              : null;
           return Card(
             margin: const EdgeInsets.all(AppSpacing.md),
             child: Padding(
@@ -29,9 +33,9 @@ class TeamMemberDetailsScreen extends StatelessWidget {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: m.profilePhoto != null ? NetworkImage(m.profilePhoto!) : null,
+                    backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
                     radius: 32,
-                    child: m.profilePhoto == null ? const Icon(Icons.person) : null,
+                    child: photoUrl == null ? const Icon(Icons.person) : null,
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
