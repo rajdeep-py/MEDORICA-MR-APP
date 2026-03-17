@@ -127,11 +127,11 @@ class _MRAttendanceCardState extends ConsumerState<MRAttendanceCard> {
   @override
   Widget build(BuildContext context) {
     final attendance = ref.watch(todaysAttendanceProvider);
-    final notifier = ref.read(attendanceNotifierProvider.notifier);
+    ref.read(attendanceNotifierProvider.notifier);
     final bool isLoading = ref.watch(attendanceLoadingProvider);
     final bool isSubmitting = ref.watch(attendanceSubmittingProvider);
     final String? error = ref.watch(attendanceErrorProvider);
-    final int selectedMonthAttendanceCount = ref.watch(
+    ref.watch(
       selectedMonthAttendanceCountProvider,
     );
 
@@ -283,35 +283,7 @@ class _MRAttendanceCardState extends ConsumerState<MRAttendanceCard> {
                   ),
               ],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Records in selected month: $selectedMonthAttendanceCount',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.quaternary,
-                    ),
-                  ),
-                ),
-                TextButton.icon(
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(0, 36),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                    ),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  onPressed: isLoading
-                      ? null
-                      : () {
-                          notifier.loadCurrentMrAttendance();
-                        },
-                  icon: const Icon(Iconsax.refresh, size: 16),
-                  label: const Text('Refresh'),
-                ),
-              ],
-            ),
+           
             const SizedBox(height: AppSpacing.xs),
             Text(
               'We capture a timestamped selfie as proof of your visit. The photo and time are stored securely and used by your organization for verification.',
