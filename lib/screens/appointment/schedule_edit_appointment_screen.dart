@@ -583,10 +583,8 @@ class _ScheduleEditAppointmentScreenState
                     ),
                     contentPadding: const EdgeInsets.all(AppSpacing.md),
                   ),
+                  // Appointment place is now optional
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter appointment place';
-                    }
                     return null;
                   },
                 ),
