@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/team.dart';
 import '../../services/api_url.dart';
 import '../../theme/app_theme.dart';
@@ -27,165 +28,239 @@ class TeamMemberDetailsScreen extends StatelessWidget {
           final String? photoUrl = m.profilePhoto != null
               ? ApiUrl.getFullUrl(m.profilePhoto!)
               : null;
-          return Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-            ),
-            elevation: 4,
-            color: AppColors.white,
-            margin: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenPaddingHorizontal,
-              vertical: AppSpacing.md,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppBorderRadius.lg),
-                    topRight: Radius.circular(AppBorderRadius.lg),
-                  ),
-                  child: photoUrl != null
-                      ? Image.network(
-                          photoUrl,
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        )
-                      : Container(
-                          height: 180,
-                          color: AppColors.primaryLight,
-                          child: Center(
-                            child: Icon(Iconsax.user, color: AppColors.primary, size: 64),
-                          ),
-                        ),
+          return InkWell(
+            borderRadius: BorderRadius.circular(AppBorderRadius.md),
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        m.fullName,
-                        style: AppTypography.h2.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
+                builder: (context) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.shadowColor.withOpacity(0.08),
+                          blurRadius: 16,
+                          offset: const Offset(0, -4),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight.withAlpha(120),
-                          borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                        ),
-                        child: Column(
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Profile photo and name
+                        Row(
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Iconsax.call, size: 18, color: AppColors.primary),
-                                const SizedBox(width: 8),
-                                Text(m.phoneNo, style: AppTypography.bodySmall),
-                              ],
-                            ),
-                            if (m.altPhoneNo != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Iconsax.call_add, size: 18, color: AppColors.primary),
-                                    const SizedBox(width: 8),
-                                    Text(m.altPhoneNo!, style: AppTypography.bodySmall),
-                                  ],
-                                ),
-                              ),
-                            if (m.email != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Iconsax.sms, size: 18, color: AppColors.primary),
-                                    const SizedBox(width: 8),
-                                    Text(m.email!, style: AppTypography.bodySmall),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Divider(color: AppColors.primary.withAlpha(120)),
-                      const SizedBox(height: AppSpacing.md),
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight.withAlpha(120),
-                          borderRadius: BorderRadius.circular(AppBorderRadius.md),
-                        ),
-                        child: Column(
-                          children: [
-                            if (m.headquarterAssigned != null)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                            photoUrl != null
+                                ? CircleAvatar(
+                                    radius: 36,
+                                    backgroundImage: NetworkImage(photoUrl),
+                                    backgroundColor: AppColors.primaryLight,
+                                  )
+                                : CircleAvatar(
+                                    radius: 36,
+                                    backgroundColor: AppColors.primaryLight,
+                                    child: Icon(Iconsax.user, color: AppColors.primary, size: 36),
+                                  ),
+                            const SizedBox(width: AppSpacing.lg),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Iconsax.location, size: 18, color: AppColors.primary),
-                                  const SizedBox(width: 8),
-                                  Text(m.headquarterAssigned!, style: AppTypography.bodySmall),
+                                  Text(
+                                    m.fullName,
+                                    style: AppTypography.h2.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    m.phoneNo,
+                                    style: AppTypography.body.copyWith(color: AppColors.black),
+                                  ),
                                 ],
                               ),
-                            if (m.territoriesOfWork != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(Iconsax.map, size: 18, color: AppColors.primary),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        m.territoriesOfWork!.join(", "),
-                                        style: AppTypography.bodySmall,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
+                            ),
+                            IconButton(
+                              icon: const Icon(Iconsax.call, color: AppColors.primary, size: 24),
+                              onPressed: () async {
+                                final url = Uri.parse('tel:${m.phoneNo}');
+                                await launchUrl(url);
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        // Action buttons (fix infinite width)
+                        Wrap(
+                          spacing: AppSpacing.md,
+                          runSpacing: AppSpacing.md,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            if (m.email != null)
+                              SizedBox(
+                                width: 120,
+                                child: ElevatedButton.icon(
+                                  style: AppButtonStyles.secondaryButton(),
+                                  icon: const Icon(Iconsax.sms, color: AppColors.primary),
+                                  label: Text('Mail', style: AppTypography.buttonMedium.copyWith(color: AppColors.primary)),
+                                  onPressed: () async {
+                                    final url = Uri.parse('mailto:${m.email}');
+                                    await launchUrl(url);
+                                  },
                                 ),
                               ),
                             if (m.address != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(Iconsax.home, size: 18, color: AppColors.primary),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        m.address!,
-                                        style: AppTypography.bodySmall,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
+                              SizedBox(
+                                width: 120,
+                                child: ElevatedButton.icon(
+                                  style: AppButtonStyles.secondaryButton(),
+                                  icon: const Icon(Iconsax.location, color: AppColors.primary),
+                                  label: Text('Map', style: AppTypography.buttonMedium.copyWith(color: AppColors.primary)),
+                                  onPressed: () async {
+                                    final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(m.address!)}');
+                                    await launchUrl(url);
+                                  },
                                 ),
                               ),
                           ],
                         ),
+                        const SizedBox(height: AppSpacing.lg),
+                        // Details
+                        if (m.altPhoneNo != null)
+                          Row(
+                            children: [
+                              Icon(Iconsax.call_add, size: 18, color: AppColors.primary),
+                              const SizedBox(width: 8),
+                              Text(m.altPhoneNo!, style: AppTypography.bodySmall),
+                              IconButton(
+                                icon: const Icon(Iconsax.call_add, color: AppColors.primary),
+                                onPressed: () async {
+                                  final url = Uri.parse('tel:${m.altPhoneNo}');
+                                  await launchUrl(url);
+                                },
+                              ),
+                            ],
+                          ),
+                        if (m.headquarterAssigned != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              children: [
+                                Icon(Iconsax.location, size: 18, color: AppColors.primary),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(m.headquarterAssigned!, style: AppTypography.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (m.territoriesOfWork != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(Iconsax.map, size: 18, color: AppColors.primary),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    m.territoriesOfWork!.join(", "),
+                                    style: AppTypography.bodySmall,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (m.address != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(Iconsax.home, size: 18, color: AppColors.primary),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    m.address!,
+                                    style: AppTypography.bodySmall,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: AppSpacing.md),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppBorderRadius.md),
+              ),
+              elevation: 2,
+              color: AppColors.white,
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPaddingHorizontal,
+                vertical: AppSpacing.sm,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Row(
+                  children: [
+                    photoUrl != null
+                        ? CircleAvatar(
+                            radius: 32,
+                            backgroundImage: NetworkImage(photoUrl),
+                            backgroundColor: AppColors.primaryLight,
+                          )
+                        : CircleAvatar(
+                            radius: 32,
+                            backgroundColor: AppColors.primaryLight,
+                            child: Icon(Iconsax.user, color: AppColors.primary, size: 32),
+                          ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            m.fullName,
+                            style: AppTypography.h3.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(Iconsax.call, size: 16, color: AppColors.primary),
+                              const SizedBox(width: 4),
+                              Text(m.phoneNo, style: AppTypography.bodySmall),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         },
