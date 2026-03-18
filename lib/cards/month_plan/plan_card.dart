@@ -59,13 +59,7 @@ class PlanCard extends ConsumerWidget {
                         DateFormat('EEEE, MMMM d').format(date),
                         style: AppTypography.h3.copyWith(color: AppColors.primary),
                       ),
-                      if (plan.activities.isNotEmpty)
-                        Text(
-                          '${plan.completedCount} of ${plan.totalCount} completed',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.quaternary,
-                          ),
-                        ),
+                      // Completion feature removed
                     ],
                   ),
                 ),
@@ -124,7 +118,7 @@ class PlanCard extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.md),
                 itemBuilder: (context, index) {
                   final activity = plan.activities[index];
-                  return _buildActivityItem(context, ref, plan, activity);
+                  return _buildActivityItem(context, ref, activity);
                 },
               ),
           ],
@@ -136,57 +130,26 @@ class PlanCard extends ConsumerWidget {
   Widget _buildActivityItem(
     BuildContext context,
     WidgetRef ref,
-    MonthPlan plan,
     PlanActivity activity,
   ) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: activity.isCompleted
-              ? AppColors.success.withAlpha(100)
-              : AppColors.divider,
+          color: AppColors.divider,
           width: 1.5,
         ),
         borderRadius: BorderRadius.circular(AppBorderRadius.md),
-        color: activity.isCompleted
-            ? AppColors.success.withAlpha(20)
-            : Colors.transparent,
+        color: Colors.transparent,
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Checkbox
-            GestureDetector(
-              onTap: () {
-                ref
-                    .read(monthPlanProvider.notifier)
-                    .toggleActivityCompletion(plan.id, activity.id);
-              },
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: activity.isCompleted
-                      ? AppColors.success
-                      : Colors.transparent,
-                  border: Border.all(
-                    color: activity.isCompleted
-                        ? AppColors.success
-                        : AppColors.quaternary,
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(AppBorderRadius.sm),
-                ),
-                child: activity.isCompleted
-                    ? const Icon(
-                        Icons.check,
-                        size: 16,
-                        color: AppColors.white,
-                      )
-                    : null,
-              ),
+            Icon(
+              Iconsax.activity,
+              color: AppColors.primary,
+              size: 18,
             ),
             const SizedBox(width: AppSpacing.md),
             // Activity details
@@ -196,12 +159,6 @@ class PlanCard extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Iconsax.activity,
-                        color: AppColors.primary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
                       Text(
                         activity.type.isNotEmpty ? activity.type : 'Activity',
                         style: AppTypography.bodySmall.copyWith(
