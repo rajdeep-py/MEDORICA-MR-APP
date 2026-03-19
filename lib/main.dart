@@ -71,9 +71,9 @@ class MyApp extends StatelessWidget {
   Future<bool> _shouldShowUpdateScreen() async {
     try {
       final info = await PackageInfo.fromPlatform();
-      final currentVersion = info.version;
+      final currentBuildNumber = info.buildNumber;
       if (kDebugMode) {
-        print('Current app version: $currentVersion');
+        print('Current app build number: $currentBuildNumber');
       }
       final data = await AppUpdateServices().fetchLatestVersionInfo();
       if (kDebugMode) {
@@ -84,11 +84,12 @@ class MyApp extends StatelessWidget {
         print('Latest APK version from backend: $latestVersion');
       }
       if (latestVersion == null) return false;
-      final latest = latestVersion.replaceAll('.apk', '');
+      // Extract build number from backend APK filename
+      final latestBuildNumber = RegExp(r'_(\d+)\.apk').firstMatch(latestVersion)?.group(1);
       if (kDebugMode) {
-        print('Normalized latest version: $latest');
+        print('Extracted latest build number: $latestBuildNumber');
       }
-      final needsUpdate = latest != currentVersion;
+      final needsUpdate = latestBuildNumber != currentBuildNumber;
       if (kDebugMode) {
         print('Needs update? $needsUpdate');
       }

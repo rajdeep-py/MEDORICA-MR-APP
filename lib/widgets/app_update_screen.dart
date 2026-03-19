@@ -87,7 +87,7 @@ class _AppUpdateScreenState extends State<AppUpdateScreen> {
           decoration: BoxDecoration(
             borderRadius: AppBorderRadius.xlRadius,
             gradient: LinearGradient(
-              colors: [AppColors.primary, AppColors.secondary],
+              colors: [AppColors.white, AppColors.white],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
