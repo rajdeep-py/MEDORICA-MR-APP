@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
@@ -8,68 +10,83 @@ class TransparentLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withAlpha(15), // ~15% alpha
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withAlpha(20), // ~8% alpha
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primary, // ~25% alpha
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withAlpha(31), // ~12% alpha
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Image.asset(
-                  'assets/logo/logo.png',
-                  fit: BoxFit.contain,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppBorderRadius.xl),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 40),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppBorderRadius.xl),
+              color: AppColors.primary,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowColorDark,
+                  blurRadius: 32,
+                  offset: const Offset(0, 12),
                 ),
+              ],
+              border: Border.all(
+                color: AppColors.primary.withAlpha(40),
+                width: 1.2,
               ),
             ),
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
-              backgroundColor: Colors.transparent,
-              strokeWidth: 4,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              subtext,
-              style: const TextStyle(
-                color: AppColors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                shadows: [
-                  Shadow(
-                    color: AppColors.black,
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withAlpha(60),
+                        blurRadius: 24,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              textAlign: TextAlign.center,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Image.asset(
+                      'assets/logo/logo.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    backgroundColor: AppColors.secondary.withAlpha(60),
+                    strokeWidth: 4.5,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  subtext,
+                  style: const TextStyle(
+                    color: AppColors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        blurRadius: 12,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
