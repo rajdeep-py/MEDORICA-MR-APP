@@ -112,19 +112,19 @@ class _AppUpdateScreenState extends State<AppUpdateScreen> {
                 child: const Icon(
                   Icons.system_update,
                   size: 64,
-                  color: AppColors.white,
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: AppSpacing.xxl),
               Text(
                 'App Update Available',
-                style: AppTypography.h2.copyWith(color: AppColors.white),
+                style: AppTypography.h2.copyWith(color: AppColors.primary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
                 'A new version ($_latestVersion) is ready to download.',
-                style: AppTypography.bodyLarge.copyWith(color: AppColors.secondary),
+                style: AppTypography.bodyLarge.copyWith(color: AppColors.primary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -140,7 +140,7 @@ class _AppUpdateScreenState extends State<AppUpdateScreen> {
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       'Downloading... ${(100 * _progress).toStringAsFixed(0)}%',
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.white),
+                      style: AppTypography.bodySmall.copyWith(color: AppColors.primary),
                     ),
                   ],
                 )
